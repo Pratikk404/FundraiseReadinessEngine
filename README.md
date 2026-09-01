@@ -1,5 +1,20 @@
 # Fundraise Readiness Engine
 
+![Java](https://img.shields.io/badge/Java-17-ED8B00?style=for-the-badge&logo=openjdk&logoColor=white)
+![Spring Boot](https://img.shields.io/badge/Spring_Boot-4.0-6DB33F?style=for-the-badge&logo=springboot&logoColor=white)
+![Spring Security](https://img.shields.io/badge/Spring_Security-6.x-6DB33F?style=for-the-badge&logo=springsecurity&logoColor=white)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-4169E1?style=for-the-badge&logo=postgresql&logoColor=white)
+![MongoDB](https://img.shields.io/badge/MongoDB-7-47A248?style=for-the-badge&logo=mongodb&logoColor=white)
+![Redis](https://img.shields.io/badge/Redis-7-DC382D?style=for-the-badge&logo=redis&logoColor=white)
+![Docker](https://img.shields.io/badge/Docker-24-2496ED?style=for-the-badge&logo=docker&logoColor=white)
+![Maven](https://img.shields.io/badge/Maven-3.x-C71A36?style=for-the-badge&logo=apachemaven&logoColor=white)
+![H2](https://img.shields.io/badge/H2_DB-2.4-00A5E0?style=for-the-badge&logo=databricks&logoColor=white)
+![JWT](https://img.shields.io/badge/JWT-0.12-000000?style=for-the-badge&logo=jsonwebtokens&logoColor=white)
+![Lombok](https://img.shields.io/badge/Lombok-1.18-FF69B4?style=for-the-badge&logo=java&logoColor=white)
+![GitHub](https://img.shields.io/badge/GitHub-180317?style=for-the-badge&logo=github&logoColor=white)
+
+---
+
 A document-driven compliance diagnostic for early-stage Indian startups. Founders upload actual legal and financial documents (cap table, incorporation cert, board resolutions, financial statements), and the system parses, cross-validates, and scores them against a rules engine that encodes the specific failure patterns investors flag during diligence.
 
 ## Why This Exists
