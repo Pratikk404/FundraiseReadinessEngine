@@ -3,7 +3,7 @@
 
 ---
 
-## Current Status: Phase 0 Complete ✅
+## Current Status: Phase 6 Complete ✅
 
 | Component | Status |
 |-----------|--------|
@@ -14,172 +14,190 @@
 | H2 in-memory database (local dev) | ✅ Done |
 | Docker Compose (PostgreSQL, MongoDB, Redis) | ✅ Done |
 | Technical spec v2.0 | ✅ Done |
-| React dashboard | ❌ Not started |
-| Document upload & parsing | ❌ Not started |
-| Node.js processing worker | ❌ Not started |
-| LLM-powered gap reports | ❌ Not started |
-| Tests | ❌ Not started |
-| Deployment infrastructure | ❌ Not started |
+| React dashboard (Landing, Login, Register, Dashboard, Upload, GapReport) | ✅ Done |
+| Document upload & CSV/XLSX parser | ✅ Done |
+| Node.js processing worker (BullMQ + pdf-parse + MongoDB) | ✅ Done |
+| Gap report generation + PDF export | ✅ Done |
+| Backend tests (9 test files — rules, auth, integration) | ✅ Done |
+| CI/CD (GitHub Actions — backend tests, frontend build, worker check) | ✅ Done |
+| Swagger/OpenAPI documentation | ✅ Done |
+| Email notifications (async on compliance check) | ✅ Done |
+| Admin dashboard (system stats endpoint) | ✅ Done |
+| Rate limiting, input sanitization, security headers | ✅ Done |
+| Deployment configs (Railway backend + Vercel frontend) | ✅ Done |
+| **Actual live deployment** | 🔄 In progress |
 
 ---
 
-## What's Missing to Be a Real Product
+## What's Built vs. What's Left
 
-### TIER 1 — Core Features (Must Have to Demo/Sell)
+### TIER 1 — Core Features
 
-#### 1. React Dashboard
-- [ ] Login / Register pages
-- [ ] Company profile setup (name, incorporation date, DPIIT status)
-- [ ] Document upload flow (drag & drop, file type validation)
-- [ ] Readiness score dashboard (overall + per-category breakdown)
-- [ ] Findings list with severity badges (CRITICAL / WARNING / INFO)
-- [ ] Before/after score tracking
-- [ ] Responsive design (mobile-friendly for founders on the go)
+#### 1. React Dashboard ✅ DONE
+- [x] Login / Register pages
+- [x] Company profile setup (create company)
+- [x] Document upload flow (drag & drop, file type validation)
+- [x] Readiness score dashboard (overall + per-category breakdown)
+- [x] Findings list with severity badges (CRITICAL / WARNING / INFO)
+- [x] Before/after score tracking (score history endpoint)
+- [x] Responsive design (Tailwind CSS)
+- [ ] Profile settings page — *not started*
 
-#### 2. Document Upload & Parsing
-- [ ] File upload endpoint (multipart, stored to local/S3)
-- [ ] CSV/XLSX cap table parser (Apache POI — already in pom.xml)
-- [ ] Auto-extraction of equity events from uploaded cap table
-- [ ] Auto-extraction of share classes
-- [ ] Document processing status tracking (PENDING → PROCESSING → COMPLETED)
-- [ ] Error handling for corrupt/unsupported files
+#### 2. Document Upload & Parsing ✅ DONE
+- [x] File upload endpoint (multipart, stored locally)
+- [x] CSV/XLSX cap table parser (Apache POI in backend)
+- [x] Auto-extraction of equity events from uploaded cap table
+- [x] Auto-extraction of share classes
+- [x] Document processing status tracking
+- [x] Error handling for corrupt/unsupported files
 
-#### 3. Unit Tests
-- [ ] DilutionSumRule tests (sum=100%, sum<100%, sum>100%, no data)
-- [ ] DpiitRecognitionRule tests (recognized, not recognized, unknown, lapsed)
-- [ ] EsopConsistencyRule tests (formal vs informal, pool overflow)
-- [ ] ShareClassConsistencyRule tests (matching vs mismatched)
-- [ ] ValuationConsistencyRule tests (consistent, inconsistent, zero price)
-- [ ] Auth flow tests (register, login, JWT validation)
-- [ ] ComplianceService integration test
+#### 3. Unit Tests ✅ DONE
+- [x] DilutionSumRule tests
+- [x] DpiitRecognitionRule tests
+- [x] EsopConsistencyRule tests
+- [x] ShareClassConsistencyRule tests
+- [x] ValuationConsistencyRule tests
+- [x] RulesEngine integration test
+- [x] Auth flow tests (register, login, JWT validation)
+- [x] Full flow integration test
+- [ ] Frontend tests — *not started*
 
-#### 4. Basic CI/CD
-- [ ] GitHub Actions workflow (build + test on push)
-- [ ] Dockerfile for backend
-- [ ] Deploy to Railway / Render / Fly.io (free tier)
+#### 4. CI/CD ✅ DONE
+- [x] GitHub Actions workflow (build + test on push/PR)
+- [x] Backend test job (JDK 17, Maven)
+- [x] Frontend build job (Node 20, npm ci + build)
+- [x] Worker install check job
+- [x] Dockerfiles (backend, frontend, worker)
+- [x] Deployment configs (Railway + Vercel)
+- [ ] Live deployment verification — *in progress*
 
 ---
 
-### TIER 2 — Production Features (Needed to Actually Sell)
+### TIER 2 — Production Features
 
-#### 5. Document Processing Pipeline
-- [ ] Node.js worker service (Express + BullMQ)
-- [ ] PDF text extraction (pdf-parse for text-native, Apache Tika for scanned)
-- [ ] Regex-based entity extraction for structured fields
-- [ ] MongoDB storage for raw parsed text
-- [ ] Queue integration (Redis-backed BullMQ)
-- [ ] Dead-letter queue for failed jobs
+#### 5. Document Processing Pipeline ✅ DONE
+- [x] Node.js worker service (Express + BullMQ)
+- [x] PDF text extraction (pdf-parse)
+- [x] Regex-based entity extraction for structured fields
+- [x] MongoDB storage for raw parsed text
+- [x] Queue integration (Redis-backed BullMQ)
+- [ ] Dead-letter queue for failed jobs — *not started*
 
-#### 6. Intelligent Gap Report
-- [ ] Report generation service (template-based, deterministic)
-- [ ] Category-grouped findings (Cap Table, DPIIT, FEMA, ESOP, Share Structure, Valuation)
-- [ ] Severity-based coloring (RED = must fix, YELLOW = should fix, GREEN = advisory)
-- [ ] Priority actions section (top 3 things to fix first)
-- [ ] PDF export of gap report
-- [ ] Source document reference for each finding
+#### 6. Intelligent Gap Report ✅ DONE
+- [x] Report generation service (template-based)
+- [x] Category-grouped findings (Cap Table, DPIIT, FEMA, ESOP, Share Structure, Valuation)
+- [x] Severity-based coloring (RED = must fix, YELLOW = should fix, GREEN = advisory)
+- [x] Priority actions section
+- [x] PDF export of gap report (HTML-based printable)
+- [x] Source document reference for each finding
 
 #### 7. User Management & Onboarding
-- [ ] Email verification on registration
-- [ ] Password reset flow
-- [ ] Role-based access (Founder, Advisor, Admin)
-- [ ] Advisor view (can see multiple companies)
-- [ ] Profile settings page
+- [x] JWT authentication (register, login)
+- [x] Role-based access (basic — admin vs user)
+- [ ] Email verification on registration — *not started*
+- [ ] Password reset flow — *not started*
+- [ ] Advisor view (can see multiple companies) — *not started*
+- [ ] Profile settings page — *not started*
 
-#### 8. Notifications
-- [ ] Email notification when processing completes
-- [ ] Email notification when readiness score changes
-- [ ] In-app notification bell
+#### 8. Notifications ✅ DONE
+- [x] Email notification when compliance check completes
+- [ ] Email notification when readiness score changes — *not started*
+- [ ] In-app notification bell — *not started*
 
 ---
 
-### TIER 3 — Monetization Features (Needed for Revenue)
+### TIER 3 — Monetization Features
 
-#### 9. Pricing & Payments
+#### 9. Pricing & Payments — NOT STARTED
 - [ ] Pricing page (Free / Pro / Enterprise tiers)
-- [ ] Free tier: 1 company, basic checks, no PDF export
-- [ ] Pro tier: Unlimited companies, full checks, PDF export, email reports
-- [ ] Enterprise: API access, custom rules, white-label
-- [ ] Stripe integration for payments
+- [ ] Stripe integration
 - [ ] Subscription management
 
-#### 10. Landing Page & Marketing
-- [ ] Landing page (hero, features, pricing, testimonials)
-- [ ] SEO optimization
-- [ ] Demo video walkthrough
-- [ ] Blog / content marketing setup
+#### 10. Landing Page & Marketing ✅ DONE
+- [x] Landing page (hero, features, CTA)
+- [ ] SEO optimization — *not started*
+- [ ] Demo video walkthrough — *not started*
+- [ ] Blog / content marketing setup — *not started*
 
-#### 11. Analytics & Monitoring
+#### 11. Analytics & Monitoring — NOT STARTED
 - [ ] User analytics (signup funnel, feature usage)
 - [ ] Error tracking (Sentry)
-- [ ] Performance monitoring (response times, DB queries)
+- [ ] Performance monitoring
 - [ ] Admin dashboard (user count, revenue, active companies)
 
-#### 12. Security & Compliance
-- [ ] HTTPS enforcement
-- [ ] Rate limiting (per user, per IP)
-- [ ] Input sanitization (XSS prevention)
-- [ ] CORS lockdown (production origins only)
-- [ ] JWT secret rotation
-- [ ] Data encryption at rest
-- [ ] GDPR compliance (data export, deletion)
-- [ ] Privacy policy & terms of service
+#### 12. Security & Compliance ✅ MOSTLY DONE
+- [x] HTTPS enforcement (via deployment platforms)
+- [x] Rate limiting (per user, per IP)
+- [x] Input sanitization (XSS prevention)
+- [x] CORS lockdown (production origins only)
+- [x] Security headers
+- [ ] JWT secret rotation — *not started*
+- [ ] Data encryption at rest — *not started*
+- [ ] GDPR compliance (data export, deletion) — *not started*
+- [ ] Privacy policy & terms of service — *not started*
 
 ---
 
-### TIER 4 — Scale Features (Needed for Growth)
+### TIER 4 — Scale Features
 
-#### 13. API & Integrations
-- [ ] REST API documentation (OpenAPI/Swagger)
-- [ ] API key management for enterprise users
-- [ ] Webhook support (for advisors who want to integrate)
-- [ ] Zapier / n8n integration
+#### 13. API & Integrations ✅ PARTIALLY DONE
+- [x] REST API documentation (OpenAPI/Swagger)
+- [ ] API key management for enterprise users — *not started*
+- [ ] Webhook support — *not started*
+- [ ] Zapier / n8n integration — *not started*
 
-#### 14. Advanced Features
+#### 14. Advanced Features — NOT STARTED
 - [ ] Multi-language support (Hindi, Marathi, Tamil)
-- [ ] WhatsApp notification integration (Indian founders live on WhatsApp)
-- [ ] CAPIF/regulatory update alerts (when FEMA/DPIIT rules change)
+- [ ] WhatsApp notification integration
+- [ ] CAPIF/regulatory update alerts
 - [ ] Cap table comparison tool (before/after round modeling)
-- [ ] Investor readiness checklist (beyond compliance)
+- [ ] Investor readiness checklist
 
-#### 15. Infrastructure
-- [ ] PostgreSQL (production, via Docker or managed)
-- [ ] MongoDB (production, via Docker or managed)
-- [ ] Redis (production, for queue + caching)
-- [ ] S3 / object storage for documents
-- [ ] CDN for static assets
-- [ ] Auto-scaling configuration
-- [ ] Database backups & disaster recovery
-- [ ] Staging environment
-
----
-
-## Realistic Build Order
-
-| Phase | Duration | What Gets Built | Milestone |
-|-------|----------|----------------|-----------|
-| **Phase 0** ✅ | Done | Backend scaffold, rules engine, seed data | Backend compiles and runs |
-| **Phase 1** | 1-2 weeks | Unit tests, document upload, CSV parser | Can upload cap table → see findings |
-| **Phase 2** | 1-2 weeks | React dashboard, score visualization | Working demo end-to-end |
-| **Phase 3** | 1 week | Node worker, PDF parsing, MongoDB | Real document processing |
-| **Phase 4** | 1 week | Gap report generation, PDF export | Shareable compliance report |
-| **Phase 5** | 1 week | Landing page, pricing, Stripe | Ready to accept paying users |
-| **Phase 6** | 1 week | CI/CD, deployment, monitoring | Live on the internet |
-
-**Total: ~6-7 weeks to a sellable product**
+#### 15. Infrastructure ✅ DONE
+- [x] PostgreSQL (Docker Compose)
+- [x] MongoDB (Docker Compose)
+- [x] Redis (Docker Compose)
+- [ ] S3 / object storage for documents — *not started*
+- [ ] CDN for static assets — *not started*
+- [ ] Auto-scaling configuration — *not started*
+- [ ] Database backups & disaster recovery — *not started*
+- [ ] Staging environment — *not started*
 
 ---
 
-## Day-by-Day Plan for This Week
+## Build Order
 
-| Day | Task |
-|-----|------|
-| **Day 1 (Tomorrow)** | Install Docker, spin up PostgreSQL + MongoDB, fix compliance check 403 bug, run end-to-end test |
-| **Day 2** | Write unit tests for all 5 rules, fix any edge cases found |
-| **Day 3** | Build document upload endpoint + CSV/XLSX cap table parser |
-| **Day 4** | Scaffold React project, build login/register pages |
-| **Day 5** | Build company profile setup + document upload UI |
-| **Day 6** | Build readiness dashboard with score visualization |
-| **Day 7** | Wire everything end-to-end: upload → parse → check → score → display |
+| Phase | Status | What Got Built | Milestone |
+|-------|--------|----------------|-----------|
+| **Phase 0** ✅ | Done | Backend scaffold, 5 rules, seed data, auth | Backend compiles and runs |
+| **Phase 1** ✅ | Done | Unit tests (9 files), document upload, CSV/XLSX parser | Can upload cap table → see findings |
+| **Phase 2** ✅ | Done | React dashboard (6 pages), score visualization, gap report | Working demo end-to-end |
+| **Phase 3** ✅ | Done | Node worker, Docker Compose full stack | Real document processing |
+| **Phase 4** ✅ | Done | CI/CD (GitHub Actions), deployment configs | Automated builds |
+| **Phase 5** ✅ | Done | Rate limiting, security hardening | Production-ready security |
+| **Phase 6** ✅ | Done | Swagger docs, email notifications, admin dashboard | API docs + monitoring |
+| **Phase 7** 🔄 | In Progress | Railway backend + Vercel frontend deployment | Live on the internet |
+| **Phase 8** | Planned | Email verification, password reset, profile settings | Full user management |
+| **Phase 9** | Planned | Pricing page, Stripe integration | Ready to accept paying users |
+| **Phase 10** | Planned | Analytics, monitoring, staging env | Production operations |
+
+---
+
+## What's Left for MVP (Sellable Product)
+
+### Must-do before launch:
+1. **Verify live deployment** — Railway backend + Vercel frontend are configured but need to be tested
+2. **Email verification** — founders need to confirm email before using the tool
+3. **Password reset** — can't sell if users get locked out
+4. **Profile settings** — basic account management
+5. **Pricing page + Stripe** — the actual money-making layer
+
+### Nice-to-have before launch:
+6. Frontend tests (current: 0)
+7. Dead-letter queue for failed document processing
+8. S3 storage for documents (currently local filesystem)
+9. JWT secret rotation
+10. GDPR data export/deletion
 
 ---
 
