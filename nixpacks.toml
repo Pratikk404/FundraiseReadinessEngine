@@ -1,0 +1,8 @@
+[phases.setup]
+nixPkgs = ["openjdk17"]
+
+[phases.build]
+cmds = ["cd fundraise-backend && chmod +x mvnw && ./mvnw clean package -DskipTests -B -q"]
+
+[start]
+cmd = "cd fundraise-backend && java -jar target/*.jar --spring.profiles.active=prod"
