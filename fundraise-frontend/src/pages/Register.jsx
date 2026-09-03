@@ -20,7 +20,7 @@ export default function Register() {
     try {
       const { data } = await authAPI.register({ name, email, password })
       login(data.token, { email: data.email, name: data.name, role: data.role })
-      navigate('/')
+      navigate('/app')
     } catch (err) {
       setError(err.response?.data?.message || 'Registration failed')
     } finally {

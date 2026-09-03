@@ -19,7 +19,7 @@ export default function Login() {
     try {
       const { data } = await authAPI.login({ email, password })
       login(data.token, { email: data.email, name: data.name, role: data.role })
-      navigate('/')
+      navigate('/app')
     } catch (err) {
       setError(err.response?.data?.message || 'Invalid email or password')
     } finally {

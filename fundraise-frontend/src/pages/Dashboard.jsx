@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { companyAPI, complianceAPI } from '../lib/api'
+import ScoreChart from '../components/ScoreChart'
 
 export default function Dashboard() {
   const queryClient = useQueryClient()
@@ -33,15 +34,16 @@ export default function Dashboard() {
   const runCheckMutation = useMutation({
     mutationFn: (companyId) => complianceAPI.runCheck(companyId),
     onSuccess: () => {
-      queryClient.invalidateQueries(['findings', selectedCompany])
-      queryClient.invalidateQueries(['scores', selectedCompany])
+      queryClient.invalidateQueries({ queryKey: ['findings', selectedCompany] })
+      queryClient.invalidateQueries({ queryKey: ['scores', selectedCompany] })
+      queryClient.invalidateQueries({ queryKey: ['companies'] })
     },
   })
 
   const createCompanyMutation = useMutation({
     mutationFn: (data) => companyAPI.createCompany(data),
     onSuccess: () => {
-      queryClient.invalidateQueries(['companies'])
+      queryClient.invalidateQueries({ queryKey: ['companies'] })
       setShowCreateModal(false)
       setNewCompany({ name: '', incorporationDate: '', dpiitStatus: 'UNKNOWN' })
     },
@@ -128,14 +130,14 @@ export default function Dashboard() {
 
             <div className="mt-4 flex gap-2">
               <Link
-                to={`/upload/${company.id}`}
+                to={`/app/upload/${company.id}`}
                 onClick={(e) => e.stopPropagation()}
                 className="text-xs bg-gray-100 text-gray-700 px-3 py-1.5 rounded-lg hover:bg-gray-200"
               >
                 Upload Docs
               </Link>
               <Link
-                to={`/report/${company.id}`}
+                to={`/app/report/${company.id}`}
                 onClick={(e) => e.stopPropagation()}
                 className="text-xs bg-green-50 text-green-700 px-3 py-1.5 rounded-lg hover:bg-green-100"
               >
@@ -162,57 +164,64 @@ export default function Dashboard() {
         )}
       </div>
 
-      {/* Findings Panel */}
-      {selectedCompany && findings && (
-        <div className="bg-white rounded-xl border border-gray-200 p-6">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-semibold text-gray-900">Findings</h2>
-            {scores && scores.length > 0 && (
-              <div className="flex gap-2">
-                {scores.map((s) => (
-                  <span key={s.category} className="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded">
-                    {s.category}: {s.score}%
-                  </span>
-                ))}
-              </div>
-            )}
+      {/* Score Chart + Findings Panel */}
+      {selectedCompany && (
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+          <div className="lg:col-span-1">
+            <ScoreChart companyId={selectedCompany} />
           </div>
-
-          {findings.length === 0 ? (
-            <div className="text-center py-8 text-gray-500">
-              <p className="text-lg mb-2">No findings!</p>
-              <p className="text-sm">All compliance checks passed.</p>
-            </div>
-          ) : (
-            <div className="space-y-3">
-              {findings.map((f) => (
-                <div key={f.id} className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg">
-                  <span className={`text-xs px-2 py-1 rounded-full font-medium ${severityColor[f.severity]}`}>
-                    {f.severity}
-                  </span>
-                  <div className="flex-1">
-                    <p className="text-sm text-gray-900">{f.description}</p>
-                    <p className="text-xs text-gray-500 mt-1">
-                      Rule: {f.ruleId} • Category: {f.category}
-                    </p>
+          <div className="lg:col-span-2">
+            <div className="bg-white rounded-xl border border-gray-200 p-6">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-lg font-semibold text-gray-900">Findings</h2>
+                {scores && scores.length > 0 && (
+                  <div className="flex gap-2">
+                    {scores.map((s) => (
+                      <span key={s.category} className="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded">
+                        {s.category}: {s.score}%
+                      </span>
+                    ))}
                   </div>
-                  {!f.resolved && (
-                    <button
-                      onClick={() => {
-                        complianceAPI.resolveFinding(f.id).then(() => {
-                          queryClient.invalidateQueries(['findings', selectedCompany])
-                          queryClient.invalidateQueries(['companies'])
-                        })
-                      }}
-                      className="text-xs text-green-600 hover:text-green-700"
-                    >
-                      Resolve
-                    </button>
-                  )}
+                )}
+              </div>
+
+              {!findings || findings.length === 0 ? (
+                <div className="text-center py-8 text-gray-500">
+                  <p className="text-lg mb-2">No findings!</p>
+                  <p className="text-sm">Run a compliance check to see results.</p>
                 </div>
-              ))}
+              ) : (
+                <div className="space-y-3">
+                  {findings.map((f) => (
+                    <div key={f.id} className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg">
+                      <span className={`text-xs px-2 py-1 rounded-full font-medium ${severityColor[f.severity]}`}>
+                        {f.severity}
+                      </span>
+                      <div className="flex-1">
+                        <p className="text-sm text-gray-900">{f.description}</p>
+                        <p className="text-xs text-gray-500 mt-1">
+                          Rule: {f.ruleId} | Category: {f.category}
+                        </p>
+                      </div>
+                      {!f.resolved && (
+                        <button
+                          onClick={() => {
+                            complianceAPI.resolveFinding(f.id).then(() => {
+                              queryClient.invalidateQueries({ queryKey: ['findings', selectedCompany] })
+                              queryClient.invalidateQueries({ queryKey: ['companies'] })
+                            })
+                          }}
+                          className="text-xs text-green-600 hover:text-green-700"
+                        >
+                          Resolve
+                        </button>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
-          )}
+          </div>
         </div>
       )}
 

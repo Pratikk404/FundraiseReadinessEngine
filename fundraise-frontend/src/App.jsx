@@ -1,5 +1,6 @@
 import { Routes, Route, Navigate } from 'react-router-dom'
 import { useAuth } from './hooks/useAuth'
+import Landing from './pages/Landing'
 import Login from './pages/Login'
 import Register from './pages/Register'
 import Dashboard from './pages/Dashboard'
@@ -13,12 +14,19 @@ function ProtectedRoute({ children }) {
   return children
 }
 
+function PublicRoute({ children }) {
+  const { user } = useAuth()
+  if (user) return <Navigate to="/app" replace />
+  return children
+}
+
 function App() {
   return (
     <Routes>
-      <Route path="/login" element={<Login />} />
-      <Route path="/register" element={<Register />} />
-      <Route path="/" element={
+      <Route path="/" element={<Landing />} />
+      <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
+      <Route path="/register" element={<PublicRoute><Register /></PublicRoute>} />
+      <Route path="/app" element={
         <ProtectedRoute>
           <Layout />
         </ProtectedRoute>
