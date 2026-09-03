@@ -60,7 +60,7 @@ This tool does the opposite: it ingests real documents and checks them against t
 - **Queue:** Redis 7 (BullMQ backing)
 - **Auth:** JWT (JSON Web Tokens)
 - **Build:** Maven (backend), npm (frontend + worker)
-- **DevOps:** Docker Compose, GitHub Actions CI
+- **DevOps:** Docker Compose, GitHub Actions CI, Railway (backend), Vercel (frontend)
 - **Testing:** JUnit 5 (49 tests), Mockito
 
 ## Getting Started
@@ -220,8 +220,9 @@ FundraiseReadinessEngine/
 - [x] **Phase 2:** React dashboard, gap report, PDF export, score history
 - [x] **Phase 3:** Node.js worker, Docker Compose full stack
 - [x] **Phase 4:** Landing page, marketing, CI/CD
-- [ ] **Phase 5:** Deploy to Railway/Vercel
-- [ ] **Phase 6:** Rate limiting, security hardening, email notifications
+- [x] **Phase 5:** Rate limiting, security hardening (done in Phase 4)
+- [ ] **Phase 6:** Deploy to Railway (backend) + Vercel (frontend)
+- [ ] **Phase 7:** Email notifications, admin dashboard, Swagger docs
 
 See `PRODUCT_ROADMAP.md` for the full build plan.
 
