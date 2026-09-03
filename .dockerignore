@@ -9,6 +9,7 @@ fundraise-frontend
 fundraise-worker
 nixpacks.toml
 railway.json
+railpack.json
 *.md
 .dockerignore
 Dockerfile

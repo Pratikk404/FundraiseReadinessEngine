@@ -1,0 +1,36 @@
+{
+  "$schema": "https://schema.railpack.com",
+  "provider": "java",
+  "packages": {
+    "java": "17"
+  },
+  "steps": {
+    "install": {
+      "commands": [
+        { "cmd": "cd fundraise-backend && chmod +x mvnw", "customName": "Make Maven wrapper executable" },
+        { "cmd": "cd fundraise-backend && ./mvnw dependency:resolve -B -q", "customName": "Resolve Maven dependencies" }
+      ]
+    },
+    "build": {
+      "inputs": [{ "step": "install" }],
+      "commands": [
+        { "cmd": "cd fundraise-backend && ./mvnw clean package -DskipTests -B -q", "customName": "Build with Maven" }
+      ]
+    }
+  },
+  "deploy": {
+    "base": {
+      "image": "eclipse-temurin:17-jre-alpine"
+    },
+    "inputs": [
+      {
+        "step": "build",
+        "include": ["fundraise-backend/target/*.jar"]
+      }
+    ],
+    "startCommand": "java -jar fundraise-backend/target/*.jar --spring.profiles.active=prod",
+    "variables": {
+      "JAVA_OPTS": "-Xms256m -Xmx512m"
+    }
+  }
+}
