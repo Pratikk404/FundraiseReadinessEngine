@@ -36,9 +36,10 @@ This tool does the opposite: it ingests real documents and checks them against t
 ## Tech Stack
 
 - **Backend:** Java 17 + Spring Boot 4.0.1 + Spring Security + Spring Data JPA
+- **Frontend:** React 18 + Vite 8 + Tailwind CSS 4 + React Query
 - **Database:** PostgreSQL (production) / H2 (local dev)
 - **Auth:** JWT (JSON Web Tokens)
-- **Build:** Maven
+- **Build:** Maven (backend), npm (frontend)
 - **DevOps:** Docker Compose
 
 ## Getting Started
@@ -85,6 +86,13 @@ docker-compose up -d
 | `GET` | `/api/companies/:id` | ✅ | Get company details |
 | `POST` | `/api/companies` | ✅ | Create new company |
 | `PUT` | `/api/companies/:id` | ✅ | Update company |
+
+### Documents
+| Method | Endpoint | Auth | Description |
+|--------|----------|:----:|-------------|
+| `POST` | `/api/documents/upload/:companyId` | ✅ | Upload document (multipart) |
+| `GET` | `/api/documents/company/:companyId` | ✅ | List company documents |
+| `GET` | `/api/documents/:id` | ✅ | Get document details |
 
 ### Compliance
 | Method | Endpoint | Auth | Description |
@@ -138,7 +146,7 @@ FundraiseReadinessEngine/
     ├── mvnw                    # Maven wrapper
     └── src/main/java/com/fundraise/engine/
         ├── config/             # Security, CORS, app config
-        ├── controller/         # REST endpoints (Auth, Company, Compliance, Health)
+        ├── controller/         # REST endpoints (Auth, Company, Compliance, Document, Health)
         ├── dto/                # Request/response DTOs
         ├── entity/             # JPA entities (Company, User, Finding, etc.)
         ├── repository/         # Spring Data JPA repositories
@@ -152,14 +160,22 @@ FundraiseReadinessEngine/
         │   ├── ShareClassConsistencyRule.java
         │   └── ValuationConsistencyRule.java
         ├── security/           # JWT filter + utilities
-        └── service/            # Business logic (Auth, Company, Compliance)
+        └── service/            # Business logic (Auth, Company, Compliance, Document)
+            └── parser/         # CSV/XLSX cap table parser (Apache POI)
+
+└── fundraise-frontend/        # React dashboard
+    └── src/
+        ├── components/        # Layout, shared UI
+        ├── hooks/             # useAuth hook
+        ├── lib/               # API client (axios)
+        └── pages/             # Login, Register, Dashboard, Upload
 ```
 
 ## Roadmap
 
 - [x] **Phase 0:** Backend scaffold, 5 rules, seed data, auth
-- [ ] **Phase 1:** Unit tests, document upload, CSV/XLSX parser
-- [ ] **Phase 2:** React dashboard, score visualization
+- [x] **Phase 1:** Unit tests (39 tests), document upload, CSV/XLSX cap table parser
+- [x] **Phase 2:** React dashboard (login, register, company cards, findings panel, upload flow)
 - [ ] **Phase 3:** Node.js worker, PDF parsing, MongoDB
 - [ ] **Phase 4:** Gap report generation, PDF export
 - [ ] **Phase 5:** Landing page, pricing, Stripe
