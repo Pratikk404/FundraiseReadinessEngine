@@ -1,0 +1,14 @@
+.git
+.github
+.gitignore
+README.md
+PRODUCT_ROADMAP.md
+SPEC_v2.md
+docker-compose.yml
+fundraise-frontend
+fundraise-worker
+nixpacks.toml
+railway.json
+*.md
+.dockerignore
+Dockerfile
