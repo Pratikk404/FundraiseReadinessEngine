@@ -2,16 +2,15 @@
 
 ![Java](https://img.shields.io/badge/Java-17-ED8B00?style=for-the-badge&logo=openjdk&logoColor=white)
 ![Spring Boot](https://img.shields.io/badge/Spring_Boot-4.0-6DB33F?style=for-the-badge&logo=springboot&logoColor=white)
-![Spring Security](https://img.shields.io/badge/Spring_Security-6.x-6DB33F?style=for-the-badge&logo=springsecurity&logoColor=white)
+![React](https://img.shields.io/badge/React-18-61DAFB?style=for-the-badge&logo=react&logoColor=white)
+![Vite](https://img.shields.io/badge/Vite-8-646CFF?style=for-the-badge&logo=vite&logoColor=white)
+![Tailwind](https://img.shields.io/badge/Tailwind-4-06B6D4?style=for-the-badge&logo=tailwindcss&logoColor=white)
+![Node.js](https://img.shields.io/badge/Node.js-20-339933?style=for-the-badge&logo=node.js&logoColor=white)
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-4169E1?style=for-the-badge&logo=postgresql&logoColor=white)
 ![MongoDB](https://img.shields.io/badge/MongoDB-7-47A248?style=for-the-badge&logo=mongodb&logoColor=white)
 ![Redis](https://img.shields.io/badge/Redis-7-DC382D?style=for-the-badge&logo=redis&logoColor=white)
 ![Docker](https://img.shields.io/badge/Docker-24-2496ED?style=for-the-badge&logo=docker&logoColor=white)
-![Maven](https://img.shields.io/badge/Maven-3.x-C71A36?style=for-the-badge&logo=apachemaven&logoColor=white)
-![H2](https://img.shields.io/badge/H2_DB-2.4-00A5E0?style=for-the-badge&logo=databricks&logoColor=white)
-![JWT](https://img.shields.io/badge/JWT-0.12-000000?style=for-the-badge&logo=jsonwebtokens&logoColor=white)
-![Lombok](https://img.shields.io/badge/Lombok-1.18-FF69B4?style=for-the-badge&logo=java&logoColor=white)
-![GitHub](https://img.shields.io/badge/GitHub-180317?style=for-the-badge&logo=github&logoColor=white)
+![GitHub Actions](https://img.shields.io/badge/GitHub_Actions-CI-2088FF?style=for-the-badge&logo=githubactions&logoColor=white)
 
 ---
 
@@ -33,43 +32,74 @@ This tool does the opposite: it ingests real documents and checks them against t
 | **Share Class Consistency** | Rights in side letters contradict incorporation documents |
 | **Valuation Consistency** | Price per share doesn't align with declared round valuation |
 
+## Architecture
+
+```
+┌─────────────┐     ┌──────────────┐     ┌──────────────┐
+│  React App  │────▶│ Spring Boot  │────▶│  PostgreSQL  │
+│  (Dashboard)│     │  (Main API)  │     │  (Structured)│
+└─────────────┘     └──────┬───────┘     └──────────────┘
+                           │
+                     ┌─────▼──────┐     ┌──────────────┐
+                     │   Queue    │────▶│ Node/Express │
+                     │ (BullMQ)   │     │  (Worker)    │
+                     └────────────┘     └──────┬───────┘
+                                               │
+                                         ┌─────▼──────┐
+                                         │  MongoDB   │
+                                         │ (Raw Text) │
+                                         └────────────┘
+```
+
 ## Tech Stack
 
 - **Backend:** Java 17 + Spring Boot 4.0.1 + Spring Security + Spring Data JPA
 - **Frontend:** React 18 + Vite 8 + Tailwind CSS 4 + React Query
-- **Database:** PostgreSQL (production) / H2 (local dev)
+- **Worker:** Node.js 20 + Express + BullMQ + pdf-parse
+- **Database:** PostgreSQL 16 (structured) + MongoDB 7 (unstructured)
+- **Queue:** Redis 7 (BullMQ backing)
 - **Auth:** JWT (JSON Web Tokens)
-- **Build:** Maven (backend), npm (frontend)
-- **DevOps:** Docker Compose
+- **Build:** Maven (backend), npm (frontend + worker)
+- **DevOps:** Docker Compose, GitHub Actions CI
+- **Testing:** JUnit 5 (49 tests), Mockito
 
 ## Getting Started
 
-### Prerequisites
-- Java 17+
-- Docker & Docker Compose
-
-### Run Locally
+### Option 1: Run Locally (H2 — No Docker)
 
 ```bash
-# Clone the repo
 git clone https://github.com/Pratikk404/FundraiseReadinessEngine.git
-cd FundraiseReadinessEngine/fundraise-backend
+cd FundraiseReadinessEngine
 
-# Run with H2 (no Docker needed)
+# Backend
+cd fundraise-backend
 ./mvnw spring-boot:run
+
+# Frontend (new terminal)
+cd ../fundraise-frontend
+npm install && npm run dev
 ```
 
-The server starts at `http://localhost:8080`.
+- Backend: `http://localhost:8080`
+- Frontend: `http://localhost:5173`
+- Test login: `pratik@test.com` / `test123`
 
-### With Docker (PostgreSQL + MongoDB + Redis)
+### Option 2: Docker Compose (Full Stack)
 
 ```bash
-# From the project root
+git clone https://github.com/Pratikk404/FundraiseReadinessEngine.git
+cd FundraiseReadinessEngine
 docker-compose up -d
-
-# Then update application.properties to use PostgreSQL profile
-# and restart the backend
 ```
+
+| Service | URL |
+|---------|-----|
+| Frontend | http://localhost:3000 |
+| Backend API | http://localhost:8080 |
+| Worker Health | http://localhost:3001/health |
+| PostgreSQL | localhost:5432 |
+| MongoDB | localhost:27017 |
+| Redis | localhost:6339 |
 
 ## API Endpoints
 
@@ -99,8 +129,11 @@ docker-compose up -d
 |--------|----------|:----:|-------------|
 | `POST` | `/api/compliance/check/:companyId` | ✅ | Run full compliance check |
 | `GET` | `/api/compliance/findings/:companyId` | ✅ | Get findings (optional `?category=` filter) |
-| `GET` | `/api/compliance/scores/:companyId` | ✅ | Get readiness scores |
+| `GET` | `/api/compliance/scores/:companyId` | ✅ | Get latest readiness scores |
+| `GET` | `/api/compliance/scores/:companyId/history` | ✅ | Score history (before/after) |
 | `PUT` | `/api/compliance/findings/:id/resolve` | ✅ | Mark finding as resolved |
+| `GET` | `/api/compliance/report/:companyId` | ✅ | Gap report (LLM-powered) |
+| `GET` | `/api/compliance/report/:companyId/pdf` | ✅ | Printable HTML report |
 
 ## Example: Run a Compliance Check
 
@@ -117,6 +150,10 @@ curl http://localhost:8080/api/companies \
 
 # 3. Run compliance check on a company
 curl -X POST http://localhost:8080/api/compliance/check/<companyId> \
+  -H "Authorization: Bearer $TOKEN"
+
+# 4. Get gap report
+curl http://localhost:8080/api/compliance/report/<companyId> \
   -H "Authorization: Bearer $TOKEN"
 ```
 
@@ -138,51 +175,56 @@ The app auto-seeds 5 synthetic companies on first run:
 
 ```
 FundraiseReadinessEngine/
-├── docker-compose.yml          # PostgreSQL + MongoDB + Redis
-├── SPEC_v2.md                  # Full technical specification
-├── PRODUCT_ROADMAP.md          # Build plan from prototype to product
-└── fundraise-backend/
-    ├── pom.xml                 # Maven dependencies
-    ├── mvnw                    # Maven wrapper
-    └── src/main/java/com/fundraise/engine/
-        ├── config/             # Security, CORS, app config
-        ├── controller/         # REST endpoints (Auth, Company, Compliance, Document, Health)
-        ├── dto/                # Request/response DTOs
-        ├── entity/             # JPA entities (Company, User, Finding, etc.)
-        ├── repository/         # Spring Data JPA repositories
-        ├── rules/              # Compliance rule engine
-        │   ├── ComplianceRule.java      # Rule interface
-        │   ├── ComplianceContext.java   # Data passed to rules
-        │   ├── RulesEngine.java         # Orchestrates all rules
-        │   ├── DilutionSumRule.java     # Equity sum check
-        │   ├── DpiitRecognitionRule.java # DPIIT status check
-        │   ├── EsopConsistencyRule.java  # ESOP grant validation
-        │   ├── ShareClassConsistencyRule.java
-        │   └── ValuationConsistencyRule.java
-        ├── security/           # JWT filter + utilities
-        └── service/            # Business logic (Auth, Company, Compliance, Document)
-            └── parser/         # CSV/XLSX cap table parser (Apache POI)
-
-└── fundraise-frontend/        # React dashboard
+├── docker-compose.yml              # Full stack orchestration
+├── SPEC_v2.md                      # Technical specification
+├── PRODUCT_ROADMAP.md              # Build plan
+│
+├── fundraise-backend/              # Spring Boot API
+│   ├── Dockerfile
+│   ├── pom.xml
+│   └── src/
+│       ├── main/java/com/fundraise/engine/
+│       │   ├── config/             # Security, CORS
+│       │   ├── controller/         # REST endpoints
+│       │   ├── dto/                # Request/response DTOs
+│       │   ├── entity/             # JPA entities
+│       │   ├── repository/         # Spring Data repos
+│       │   ├── rules/              # 5 compliance rules
+│       │   ├── security/           # JWT filter
+│       │   └── service/            # Business logic
+│       │       ├── parser/         # CSV/XLSX parser
+│       │       ├── GapReportService
+│       │       └── PdfExportService
+│       └── test/                   # 49 tests (unit + E2E)
+│
+├── fundraise-frontend/             # React dashboard
+│   ├── Dockerfile
+│   ├── nginx.conf
+│   └── src/
+│       ├── components/             # Layout, ScoreChart
+│       ├── hooks/                  # useAuth
+│       ├── lib/                    # API client
+│       └── pages/                  # Landing, Login, Register, Dashboard, Upload, GapReport
+│
+└── fundraise-worker/               # Node.js document processor
+    ├── Dockerfile
     └── src/
-        ├── components/        # Layout, shared UI
-        ├── hooks/             # useAuth hook
-        ├── lib/               # API client (axios)
-        └── pages/             # Login, Register, Dashboard, Upload
+        ├── worker.js               # BullMQ job processor
+        └── health.js               # Health endpoint
 ```
 
 ## Roadmap
 
 - [x] **Phase 0:** Backend scaffold, 5 rules, seed data, auth
-- [x] **Phase 1:** Unit tests (39 tests), document upload, CSV/XLSX cap table parser
-- [x] **Phase 2:** React dashboard (login, register, company cards, findings panel, upload flow)
-- [ ] **Phase 3:** Node.js worker, PDF parsing, MongoDB
-- [ ] **Phase 4:** Gap report generation, PDF export
-- [ ] **Phase 5:** Landing page, pricing, Stripe
-- [ ] **Phase 6:** CI/CD, deployment, monitoring
+- [x] **Phase 1:** Unit tests (49 tests), document upload, CSV/XLSX cap table parser
+- [x] **Phase 2:** React dashboard, gap report, PDF export, score history
+- [x] **Phase 3:** Node.js worker, Docker Compose full stack
+- [x] **Phase 4:** Landing page, marketing, CI/CD
+- [ ] **Phase 5:** Deploy to Railway/Vercel
+- [ ] **Phase 6:** Rate limiting, security hardening, email notifications
 
 See `PRODUCT_ROADMAP.md` for the full build plan.
 
 ---
 
-*Progress updated daily until the final product is ready.*
+*Built by [Pratik Kalambe](https://github.com/Pratikk404) — Document-driven compliance diagnostic for Indian startups.*
