@@ -11,6 +11,7 @@
 ![Redis](https://img.shields.io/badge/Redis-7-DC382D?style=for-the-badge&logo=redis&logoColor=white)
 ![Docker](https://img.shields.io/badge/Docker-24-2496ED?style=for-the-badge&logo=docker&logoColor=white)
 ![GitHub Actions](https://img.shields.io/badge/GitHub_Actions-CI-2088FF?style=for-the-badge&logo=githubactions&logoColor=white)
+![Swagger](https://img.shields.io/badge/Swagger-OpenAPI-85EA2D?style=for-the-badge&logo=swagger&logoColor=white)
 
 ---
 
@@ -59,6 +60,8 @@ This tool does the opposite: it ingests real documents and checks them against t
 - **Database:** PostgreSQL 16 (structured) + MongoDB 7 (unstructured)
 - **Queue:** Redis 7 (BullMQ backing)
 - **Auth:** JWT (JSON Web Tokens)
+- **API Docs:** OpenAPI/Swagger (springdoc-openapi)
+- **Email:** Spring Mail (async notifications on compliance checks)
 - **Build:** Maven (backend), npm (frontend + worker)
 - **DevOps:** Docker Compose, GitHub Actions CI, Railway (backend), Vercel (frontend)
 - **Testing:** JUnit 5 (49 tests), Mockito
@@ -135,6 +138,17 @@ docker-compose up -d
 | `GET` | `/api/compliance/report/:companyId` | ✅ | Gap report (LLM-powered) |
 | `GET` | `/api/compliance/report/:companyId/pdf` | ✅ | Printable HTML report |
 
+### Admin
+| Method | Endpoint | Auth | Description |
+|--------|----------|:----:|-------------|
+| `GET` | `/api/admin/stats` | ✅ | System stats (users, companies, findings) |
+
+### API Documentation
+| Method | Endpoint | Auth | Description |
+|--------|----------|:----:|-------------|
+| `GET` | `/swagger-ui.html` | — | Interactive Swagger UI |
+| `GET` | `/v3/api-docs` | — | OpenAPI JSON spec |
+
 ## Example: Run a Compliance Check
 
 ```bash
@@ -184,17 +198,15 @@ FundraiseReadinessEngine/
 │   ├── pom.xml
 │   └── src/
 │       ├── main/java/com/fundraise/engine/
-│       │   ├── config/             # Security, CORS
-│       │   ├── controller/         # REST endpoints
+│       │   ├── config/             # Security, CORS, OpenAPI, RateLimit
+│       │   ├── controller/         # REST endpoints (Auth, Company, Compliance, Document, Admin)
 │       │   ├── dto/                # Request/response DTOs
-│       │   ├── entity/             # JPA entities
-│       │   ├── repository/         # Spring Data repos
+│       │   ├── entity/             # JPA entities (9)
+│       │   ├── repository/         # Spring Data repos (8)
 │       │   ├── rules/              # 5 compliance rules
 │       │   ├── security/           # JWT filter
-│       │   └── service/            # Business logic
-│       │       ├── parser/         # CSV/XLSX parser
-│       │       ├── GapReportService
-│       │       └── PdfExportService
+│       │   └── service/            # Business logic (Auth, Company, Compliance, Document, Email, Admin, GapReport, PdfExport)
+│       │       └── parser/         # CSV/XLSX parser
 │       └── test/                   # 49 tests (unit + E2E)
 │
 ├── fundraise-frontend/             # React dashboard
@@ -221,8 +233,8 @@ FundraiseReadinessEngine/
 - [x] **Phase 3:** Node.js worker, Docker Compose full stack
 - [x] **Phase 4:** Landing page, marketing, CI/CD
 - [x] **Phase 5:** Rate limiting, security hardening (done in Phase 4)
-- [ ] **Phase 6:** Deploy to Railway (backend) + Vercel (frontend)
-- [ ] **Phase 7:** Email notifications, admin dashboard, Swagger docs
+- [x] **Phase 6:** Swagger/OpenAPI docs, email notifications, admin dashboard
+- [ ] **Phase 7:** Deploy to Railway (backend) + Vercel (frontend)
 
 See `PRODUCT_ROADMAP.md` for the full build plan.
 
