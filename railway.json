@@ -1,11 +1,11 @@
 {
   "$schema": "https://railway.app/railway.schema.json",
   "build": {
-    "builder": "NIXPACKS",
-    "buildCommand": "cd fundraise-backend && chmod +x mvnw && ./mvnw clean package -DskipTests -B -q"
+    "builder": "DOCKERFILE",
+    "dockerfilePath": "fundraise-backend/Dockerfile"
   },
   "deploy": {
-    "startCommand": "cd fundraise-backend && java -jar target/*.jar --spring.profiles.active=prod",
+    "startCommand": "java -jar app.jar --spring.profiles.active=prod",
     "healthcheckPath": "/api/health",
     "healthcheckTimeout": 300,
     "restartPolicyType": "ON_FAILURE",
