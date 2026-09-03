@@ -1,0 +1,24 @@
+{
+  "name": "fundraise-worker",
+  "version": "1.0.0",
+  "description": "",
+  "main": "src/worker.js",
+  "type": "module",
+  "scripts": {
+    "start": "node src/worker.js",
+    "health": "node src/health.js",
+    "dev": "node --watch src/worker.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "bullmq": "^6.3.4",
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1",
+    "ioredis": "^6.0.0",
+    "mongodb": "^7.6.0",
+    "pdf-parse": "^2.4.5"
+  }
+}
