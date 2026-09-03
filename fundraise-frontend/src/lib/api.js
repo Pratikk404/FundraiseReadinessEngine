@@ -60,7 +60,10 @@ export const complianceAPI = {
   getFindings: (companyId, category) =>
     api.get(`/compliance/findings/${companyId}`, { params: { category } }),
   getScores: (companyId) => api.get(`/compliance/scores/${companyId}`),
+  getScoreHistory: (companyId) => api.get(`/compliance/scores/${companyId}/history`),
   resolveFinding: (findingId) => api.put(`/compliance/findings/${findingId}/resolve`),
+  getGapReport: (companyId) => api.get(`/compliance/report/${companyId}`),
+  getPdfReport: (companyId) => api.get(`/compliance/report/${companyId}/pdf`, { responseType: 'text' }),
 };
 
 export default api;

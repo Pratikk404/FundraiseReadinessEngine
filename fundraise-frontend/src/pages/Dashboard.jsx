@@ -134,6 +134,13 @@ export default function Dashboard() {
               >
                 Upload Docs
               </Link>
+              <Link
+                to={`/report/${company.id}`}
+                onClick={(e) => e.stopPropagation()}
+                className="text-xs bg-green-50 text-green-700 px-3 py-1.5 rounded-lg hover:bg-green-100"
+              >
+                Gap Report
+              </Link>
               <button
                 onClick={(e) => {
                   e.stopPropagation()

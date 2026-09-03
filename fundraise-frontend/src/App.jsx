@@ -4,6 +4,7 @@ import Login from './pages/Login'
 import Register from './pages/Register'
 import Dashboard from './pages/Dashboard'
 import Upload from './pages/Upload'
+import GapReport from './pages/GapReport'
 import Layout from './components/Layout'
 
 function ProtectedRoute({ children }) {
@@ -24,6 +25,7 @@ function App() {
       }>
         <Route index element={<Dashboard />} />
         <Route path="upload/:companyId" element={<Upload />} />
+        <Route path="report/:companyId" element={<GapReport />} />
       </Route>
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>

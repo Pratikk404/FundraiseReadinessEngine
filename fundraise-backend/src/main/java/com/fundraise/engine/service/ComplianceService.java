@@ -22,6 +22,7 @@ import java.util.stream.Collectors;
 public class ComplianceService {
 
     private final RulesEngine rulesEngine;
+    private final CompanyRepository companyRepository;
     private final EquityEventRepository equityEventRepository;
     private final EsopGrantRepository esopGrantRepository;
     private final ShareClassRepository shareClassRepository;
@@ -37,24 +38,14 @@ public class ComplianceService {
     public Map<String, Object> runComplianceCheck(UUID companyId) {
         log.info("Running compliance check for company: {}", companyId);
 
+        Company company = companyRepository.findById(companyId)
+                .orElseThrow(() -> new IllegalArgumentException("Company not found: " + companyId));
+
         // Build context
         List<EquityEvent> equityEvents = equityEventRepository.findByCompanyIdOrderByEventDateAsc(companyId);
         List<EsopGrant> esopGrants = esopGrantRepository.findByCompanyId(companyId);
         List<ShareClass> shareClasses = shareClassRepository.findByCompanyId(companyId);
         List<Document> documents = documentRepository.findByCompanyId(companyId);
-
-        Company company = equityEvents.isEmpty()
-                ? null
-                : equityEvents.get(0).getCompany();
-
-        if (company == null) {
-            // Try to get company from documents
-            company = documents.isEmpty() ? null : documents.get(0).getCompany();
-        }
-
-        if (company == null) {
-            throw new IllegalArgumentException("No data found for company: " + companyId);
-        }
 
         ComplianceContext context = ComplianceContext.builder()
                 .company(company)
@@ -76,7 +67,7 @@ public class ComplianceService {
         List<Finding> savedFindings = findingRepository.saveAll(findings);
 
         // Compute scores by category
-        Map<String, ReadinessScore> scores = computeScores(companyId, savedFindings);
+        Map<String, ReadinessScore> scores = computeScores(company, savedFindings);
         readinessScoreRepository.saveAll(scores.values());
 
         // Build response
@@ -120,16 +111,56 @@ public class ComplianceService {
     }
 
     /**
-     * Get readiness scores for a company
+     * Get latest readiness scores for a company
      */
     public List<ReadinessScoreDto> getScores(UUID companyId) {
         return readinessScoreRepository.findByCompanyIdOrderByComputedAtDesc(companyId).stream()
+                .limit(5) // Latest 5 per category
                 .map(s -> ReadinessScoreDto.builder()
                         .category(s.getCategory())
                         .score(s.getScore())
                         .computedAt(s.getComputedAt())
                         .build())
                 .toList();
+    }
+
+    /**
+     * Get score history for before/after tracking.
+     * Returns scores grouped by check run (timestamp).
+     */
+    public List<Map<String, Object>> getScoreHistory(UUID companyId) {
+        List<ReadinessScore> allScores = readinessScoreRepository.findByCompanyIdOrderByComputedAtDesc(companyId);
+
+        // Group by computation timestamp (rounded to second)
+        Map<java.time.LocalDateTime, List<ReadinessScore>> byTimestamp = allScores.stream()
+                .collect(Collectors.groupingBy(
+                        s -> s.getComputedAt().withNano(0),
+                        LinkedHashMap::new,
+                        Collectors.toList()));
+
+        List<Map<String, Object>> history = new ArrayList<>();
+        for (var entry : byTimestamp.entrySet()) {
+            Map<String, Object> run = new LinkedHashMap<>();
+            run.put("computedAt", entry.getKey());
+
+            Map<String, BigDecimal> categoryScores = new LinkedHashMap<>();
+            BigDecimal totalScore = BigDecimal.ZERO;
+            int count = 0;
+
+            for (ReadinessScore score : entry.getValue()) {
+                categoryScores.put(score.getCategory(), score.getScore());
+                totalScore = totalScore.add(score.getScore());
+                count++;
+            }
+
+            run.put("categoryScores", categoryScores);
+            run.put("overallScore", count > 0
+                    ? totalScore.divide(BigDecimal.valueOf(count), 2, RoundingMode.HALF_UP)
+                    : BigDecimal.ZERO);
+            history.add(run);
+        }
+
+        return history;
     }
 
     /**
@@ -146,7 +177,7 @@ public class ComplianceService {
     /**
      * Compute readiness scores by category
      */
-    private Map<String, ReadinessScore> computeScores(UUID companyId, List<Finding> findings) {
+    private Map<String, ReadinessScore> computeScores(Company company, List<Finding> findings) {
         Map<String, ReadinessScore> scores = new LinkedHashMap<>();
 
         // Group findings by category
@@ -187,9 +218,7 @@ public class ComplianceService {
             }
 
             scores.put(category, ReadinessScore.builder()
-                    .company(companyId != null
-                            ? findingRepository.findById(0L).map(Finding::getCompany).orElse(null)
-                            : null)
+                    .company(company)
                     .category(category)
                     .score(score.setScale(2, RoundingMode.HALF_UP))
                     .build());
