@@ -13,4 +13,5 @@ public interface FindingRepository extends JpaRepository<Finding, Long> {
     List<Finding> findByCompanyIdAndCategory(UUID companyId, String category);
     List<Finding> findByCompanyIdAndResolvedFalse(UUID companyId);
     long countByCompanyIdAndResolvedFalse(UUID companyId);
+    long countByResolvedFalse();
 }

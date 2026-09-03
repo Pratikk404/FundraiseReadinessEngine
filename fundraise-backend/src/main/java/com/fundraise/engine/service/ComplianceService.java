@@ -29,6 +29,7 @@ public class ComplianceService {
     private final DocumentRepository documentRepository;
     private final FindingRepository findingRepository;
     private final ReadinessScoreRepository readinessScoreRepository;
+    private final EmailService emailService;
 
     /**
      * Run all compliance rules for a company.
@@ -93,6 +94,17 @@ public class ComplianceService {
 
         log.info("Compliance check complete: {} findings, {} scores",
                 savedFindings.size(), scores.size());
+
+        // Send email notification
+        long criticalCount = savedFindings.stream()
+                .filter(f -> f.getSeverity() == Finding.Severity.CRITICAL)
+                .count();
+        emailService.sendComplianceCheckComplete(
+                company.getOwner().getEmail(),
+                company.getName(),
+                savedFindings.size(),
+                (int) criticalCount
+        );
 
         return result;
     }
