@@ -19,8 +19,75 @@ public class EmailService {
     @Value("${app.email.enabled:false}")
     private boolean emailEnabled;
 
+    @Value("${app.frontend.url:http://localhost:5173}")
+    private String frontendUrl;
+
     public EmailService(JavaMailSender mailSender) {
         this.mailSender = mailSender;
+    }
+
+    @Async
+    public void sendVerificationEmail(String toEmail, String name, String verificationToken) {
+        if (!emailEnabled) {
+            log.info("Email disabled — skipping verification email to {}", toEmail);
+            return;
+        }
+
+        try {
+            SimpleMailMessage message = new SimpleMailMessage();
+            message.setFrom(fromEmail);
+            message.setTo(toEmail);
+            message.setSubject("Verify your FundraiseReady account");
+
+            String verifyUrl = frontendUrl + "/verify-email?token=" + verificationToken;
+
+            message.setText(
+                "Hi " + name + ",\n\n" +
+                "Welcome to FundraiseReady!\n\n" +
+                "Please verify your email address by clicking the link below:\n\n" +
+                verifyUrl + "\n\n" +
+                "This link expires in 24 hours.\n\n" +
+                "If you didn't create an account, you can safely ignore this email.\n\n" +
+                "— FundraiseReady"
+            );
+
+            mailSender.send(message);
+            log.info("Verification email sent to {}", toEmail);
+        } catch (Exception e) {
+            log.error("Failed to send verification email to {}: {}", toEmail, e.getMessage());
+        }
+    }
+
+    @Async
+    public void sendPasswordResetEmail(String toEmail, String name, String resetToken) {
+        if (!emailEnabled) {
+            log.info("Email disabled — skipping password reset email to {}", toEmail);
+            return;
+        }
+
+        try {
+            SimpleMailMessage message = new SimpleMailMessage();
+            message.setFrom(fromEmail);
+            message.setTo(toEmail);
+            message.setSubject("Reset your FundraiseReady password");
+
+            String resetUrl = frontendUrl + "/reset-password?token=" + resetToken;
+
+            message.setText(
+                "Hi " + name + ",\n\n" +
+                "We received a request to reset your password.\n\n" +
+                "Click the link below to set a new password:\n\n" +
+                resetUrl + "\n\n" +
+                "This link expires in 1 hour.\n\n" +
+                "If you didn't request this, you can safely ignore this email.\n\n" +
+                "— FundraiseReady"
+            );
+
+            mailSender.send(message);
+            log.info("Password reset email sent to {}", toEmail);
+        } catch (Exception e) {
+            log.error("Failed to send password reset email to {}: {}", toEmail, e.getMessage());
+        }
     }
 
     @Async
@@ -47,8 +114,8 @@ public class EmailService {
                     ? "Action required: You have " + criticalCount + " critical issue(s) that need attention before fundraise.\n"
                     + "Log in to view the full gap report and priority actions.\n\n"
                     : "Looking good! No critical issues found. Review the full report for minor improvements.\n\n") +
-                "View your report: https://fundraise-readiness.vercel.app/app\n\n" +
-                "— Fundraise Readiness Engine"
+                "View your report: " + frontendUrl + "/app\n\n" +
+                "— FundraiseReady"
             );
 
             mailSender.send(message);
@@ -77,8 +144,8 @@ public class EmailService {
                 "Category: " + category + "\n" +
                 "Previous grade: " + oldGrade + "\n" +
                 "New grade: " + newGrade + "\n\n" +
-                "View your dashboard: https://fundraise-readiness.vercel.app/app\n\n" +
-                "— Fundraise Readiness Engine"
+                "View your dashboard: " + frontendUrl + "/app\n\n" +
+                "— FundraiseReady"
             );
 
             mailSender.send(message);

@@ -50,6 +50,8 @@ public class SeedData implements CommandLineRunner {
                 .email("pratik@test.com")
                 .password(passwordEncoder.encode("test123"))
                 .role(User.Role.FOUNDER)
+                .plan(User.Plan.FREE)
+                .verified(true)
                 .build());
 
         // ============================================

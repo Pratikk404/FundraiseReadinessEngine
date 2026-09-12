@@ -83,6 +83,10 @@ export default function Login() {
                 className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
                 placeholder="••••••••"
               />
+            </div>              <div className="flex items-center justify-between">
+              <Link to="/forgot-password" className="text-sm text-indigo-600 hover:text-indigo-500">
+                Forgot password?
+              </Link>
             </div>
 
             <button

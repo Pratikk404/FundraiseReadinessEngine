@@ -134,6 +134,9 @@ export default function Landing() {
               <Link to="/register" className="block text-center py-2 border border-gray-300 rounded-lg text-sm font-medium hover:bg-gray-50">
                 Get Started
               </Link>
+              <Link to="/pricing" className="block text-center text-xs text-indigo-600 hover:text-indigo-500 mt-2">
+                View all plans →
+              </Link>
             </div>
             <div className="bg-indigo-600 rounded-xl p-8 text-white relative">
               <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-1 bg-yellow-400 text-yellow-900 rounded-full text-xs font-bold">

@@ -31,6 +31,16 @@ api.interceptors.response.use(
 export const authAPI = {
   register: (data) => api.post('/auth/register', data),
   login: (data) => api.post('/auth/login', data),
+  verifyEmail: (token) => api.post('/auth/verify-email', { token }),
+  forgotPassword: (email) => api.post('/auth/forgot-password', { email }),
+  resetPassword: (token, newPassword) => api.post('/auth/reset-password', { token, newPassword }),
+};
+
+// Profile API
+export const profileAPI = {
+  getProfile: () => api.get('/profile'),
+  updateProfile: (data) => api.put('/profile', data),
+  changePassword: (data) => api.post('/profile/change-password', data),
 };
 
 // Company API
@@ -64,6 +74,11 @@ export const complianceAPI = {
   resolveFinding: (findingId) => api.put(`/compliance/findings/${findingId}/resolve`),
   getGapReport: (companyId) => api.get(`/compliance/report/${companyId}`),
   getPdfReport: (companyId) => api.get(`/compliance/report/${companyId}/pdf`, { responseType: 'text' }),
+};
+
+// Stripe API
+export const stripeAPI = {
+  createCheckout: (plan) => api.post('/stripe/checkout', { plan }),
 };
 
 export default api;
