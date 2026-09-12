@@ -3,7 +3,7 @@
 
 ---
 
-## Current Status: Phase 6 Complete ✅
+## Current Status: Phase 7 Complete ✅
 
 | Component | Status |
 |-----------|--------|
@@ -11,19 +11,27 @@
 | 5 compliance rules (DilutionSum, DPIIT, ESOP, ShareClass, Valuation) | ✅ Done |
 | 5 synthetic test companies with seed data | ✅ Done |
 | JWT authentication | ✅ Done |
+| Email verification on registration | ✅ Done |
+| Password reset flow | ✅ Done |
+| Profile settings (update name/email, change password) | ✅ Done |
 | H2 in-memory database (local dev) | ✅ Done |
 | Docker Compose (PostgreSQL, MongoDB, Redis) | ✅ Done |
 | Technical spec v2.0 | ✅ Done |
 | React dashboard (Landing, Login, Register, Dashboard, Upload, GapReport) | ✅ Done |
+| Email verification page + flow | ✅ Done |
+| Forgot/Reset password pages | ✅ Done |
+| Settings page (profile, password, plan display) | ✅ Done |
+| Dedicated pricing page with Stripe checkout | ✅ Done |
 | Document upload & CSV/XLSX parser | ✅ Done |
 | Node.js processing worker (BullMQ + pdf-parse + MongoDB) | ✅ Done |
 | Gap report generation + PDF export | ✅ Done |
-| Backend tests (9 test files — rules, auth, integration) | ✅ Done |
+| Backend tests (49 tests — rules, auth, integration) | ✅ Done |
 | CI/CD (GitHub Actions — backend tests, frontend build, worker check) | ✅ Done |
 | Swagger/OpenAPI documentation | ✅ Done |
-| Email notifications (async on compliance check) | ✅ Done |
+| Email notifications (async on compliance check + score changes) | ✅ Done |
 | Admin dashboard (system stats endpoint) | ✅ Done |
 | Rate limiting, input sanitization, security headers | ✅ Done |
+| Stripe integration (checkout sessions, webhooks, plan management) | ✅ Done |
 | Deployment configs (Railway backend + Vercel frontend) | ✅ Done |
 | **Actual live deployment** | 🔄 In progress |
 
@@ -41,7 +49,7 @@
 - [x] Findings list with severity badges (CRITICAL / WARNING / INFO)
 - [x] Before/after score tracking (score history endpoint)
 - [x] Responsive design (Tailwind CSS)
-- [ ] Profile settings page — *not started*
+- [x] Profile settings page (update name/email, change password, plan display)
 
 #### 2. Document Upload & Parsing ✅ DONE
 - [x] File upload endpoint (multipart, stored locally)
@@ -91,30 +99,39 @@
 - [x] PDF export of gap report (HTML-based printable)
 - [x] Source document reference for each finding
 
-#### 7. User Management & Onboarding
+#### 7. User Management & Onboarding ✅ DONE
 - [x] JWT authentication (register, login)
-- [x] Role-based access (basic — admin vs user)
-- [ ] Email verification on registration — *not started*
-- [ ] Password reset flow — *not started*
+- [x] Role-based access (FOUNDER, ADVISOR, ADMIN)
+- [x] Email verification on registration (token-based flow)
+- [x] Password reset flow (forgot/reset with expiring tokens)
+- [x] Profile settings page (update name/email, change password)
+- [x] Plan management (FREE, PRO, ADVISOR)
+- [x] Email verification status badge
 - [ ] Advisor view (can see multiple companies) — *not started*
-- [ ] Profile settings page — *not started*
 
 #### 8. Notifications ✅ DONE
 - [x] Email notification when compliance check completes
-- [ ] Email notification when readiness score changes — *not started*
+- [x] Email notification when readiness score changes
+- [x] Email verification email on registration
+- [x] Password reset email
 - [ ] In-app notification bell — *not started*
 
 ---
 
 ### TIER 3 — Monetization Features
 
-#### 9. Pricing & Payments — NOT STARTED
-- [ ] Pricing page (Free / Pro / Enterprise tiers)
-- [ ] Stripe integration
-- [ ] Subscription management
+#### 9. Pricing & Payments ✅ DONE
+- [x] Pricing page (Free / Pro / Advisor tiers)
+- [x] Stripe checkout session creation
+- [x] Stripe webhook handler for subscription updates
+- [x] Plan field on User entity
+- [x] Dedicated /pricing page with FAQ
+- [ ] Subscription management portal — *not started*
+- [ ] Usage-based billing — *not started*
 
 #### 10. Landing Page & Marketing ✅ DONE
-- [x] Landing page (hero, features, CTA)
+- [x] Landing page (hero, problem, how it works, features, pricing)
+- [x] Standalone pricing page
 - [ ] SEO optimization — *not started*
 - [ ] Demo video walkthrough — *not started*
 - [ ] Blog / content marketing setup — *not started*
@@ -123,7 +140,7 @@
 - [ ] User analytics (signup funnel, feature usage)
 - [ ] Error tracking (Sentry)
 - [ ] Performance monitoring
-- [ ] Admin dashboard (user count, revenue, active companies)
+- [ ] Revenue dashboard — *not started*
 
 #### 12. Security & Compliance ✅ MOSTLY DONE
 - [x] HTTPS enforcement (via deployment platforms)
@@ -131,6 +148,7 @@
 - [x] Input sanitization (XSS prevention)
 - [x] CORS lockdown (production origins only)
 - [x] Security headers
+- [x] JWT token-based auth with expiration
 - [ ] JWT secret rotation — *not started*
 - [ ] Data encryption at rest — *not started*
 - [ ] GDPR compliance (data export, deletion) — *not started*
@@ -142,8 +160,8 @@
 
 #### 13. API & Integrations ✅ PARTIALLY DONE
 - [x] REST API documentation (OpenAPI/Swagger)
+- [x] Stripe webhook integration
 - [ ] API key management for enterprise users — *not started*
-- [ ] Webhook support — *not started*
 - [ ] Zapier / n8n integration — *not started*
 
 #### 14. Advanced Features — NOT STARTED
@@ -170,15 +188,15 @@
 | Phase | Status | What Got Built | Milestone |
 |-------|--------|----------------|-----------|
 | **Phase 0** ✅ | Done | Backend scaffold, 5 rules, seed data, auth | Backend compiles and runs |
-| **Phase 1** ✅ | Done | Unit tests (9 files), document upload, CSV/XLSX parser | Can upload cap table → see findings |
+| **Phase 1** ✅ | Done | Unit tests (49 files), document upload, CSV/XLSX parser | Can upload cap table → see findings |
 | **Phase 2** ✅ | Done | React dashboard (6 pages), score visualization, gap report | Working demo end-to-end |
 | **Phase 3** ✅ | Done | Node worker, Docker Compose full stack | Real document processing |
 | **Phase 4** ✅ | Done | CI/CD (GitHub Actions), deployment configs | Automated builds |
 | **Phase 5** ✅ | Done | Rate limiting, security hardening | Production-ready security |
 | **Phase 6** ✅ | Done | Swagger docs, email notifications, admin dashboard | API docs + monitoring |
-| **Phase 7** 🔄 | In Progress | Railway backend + Vercel frontend deployment | Live on the internet |
-| **Phase 8** | Planned | Email verification, password reset, profile settings | Full user management |
-| **Phase 9** | Planned | Pricing page, Stripe integration | Ready to accept paying users |
+| **Phase 7** ✅ | Done | Email verification, password reset, profile settings, Stripe pricing | Full user management + monetization |
+| **Phase 8** 🔄 | In Progress | Railway backend + Vercel frontend deployment | Live on the internet |
+| **Phase 9** | Planned | Frontend tests, dead-letter queue, S3 storage | Production hardening |
 | **Phase 10** | Planned | Analytics, monitoring, staging env | Production operations |
 
 ---
@@ -187,10 +205,10 @@
 
 ### Must-do before launch:
 1. **Verify live deployment** — Railway backend + Vercel frontend are configured but need to be tested
-2. **Email verification** — founders need to confirm email before using the tool
-3. **Password reset** — can't sell if users get locked out
-4. **Profile settings** — basic account management
-5. **Pricing page + Stripe** — the actual money-making layer
+2. ~~**Email verification**~~ — founders need to confirm email before using the tool ✅
+3. ~~**Password reset**~~ — can't sell if users get locked out ✅
+4. ~~**Profile settings**~~ — basic account management ✅
+5. ~~**Pricing page + Stripe**~~ — the actual money-making layer ✅
 
 ### Nice-to-have before launch:
 6. Frontend tests (current: 0)

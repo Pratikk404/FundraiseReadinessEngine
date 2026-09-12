@@ -12,6 +12,7 @@
 ![Docker](https://img.shields.io/badge/Docker-24-2496ED?style=for-the-badge&logo=docker&logoColor=white)
 ![GitHub Actions](https://img.shields.io/badge/GitHub_Actions-CI-2088FF?style=for-the-badge&logo=githubactions&logoColor=white)
 ![Swagger](https://img.shields.io/badge/Swagger-OpenAPI-85EA2D?style=for-the-badge&logo=swagger&logoColor=white)
+![Stripe](https://img.shields.io/badge/Stripe-Payments-635BFF?style=for-the-badge&logo=stripe&logoColor=white)
 
 ---
 
@@ -59,9 +60,10 @@ This tool does the opposite: it ingests real documents and checks them against t
 - **Worker:** Node.js 20 + Express + BullMQ + pdf-parse
 - **Database:** PostgreSQL 16 (structured) + MongoDB 7 (unstructured)
 - **Queue:** Redis 7 (BullMQ backing)
-- **Auth:** JWT (JSON Web Tokens)
+- **Auth:** JWT (JSON Web Tokens) + email verification + password reset
+- **Payments:** Stripe (checkout sessions, webhooks, subscription management)
 - **API Docs:** OpenAPI/Swagger (springdoc-openapi)
-- **Email:** Spring Mail (async notifications on compliance checks)
+- **Email:** Spring Mail (async notifications, verification, password reset)
 - **Build:** Maven (backend), npm (frontend + worker)
 - **DevOps:** Docker Compose, GitHub Actions CI, Railway (backend), Vercel (frontend)
 - **Testing:** JUnit 5 (49 tests), Mockito
@@ -85,6 +87,7 @@ npm install && npm run dev
 
 - Backend: `http://localhost:8080`
 - Frontend: `http://localhost:5173`
+- Swagger: `http://localhost:8080/swagger-ui.html`
 - Test login: `pratik@test.com` / `test123`
 
 ### Option 2: Docker Compose (Full Stack)
@@ -99,6 +102,7 @@ docker-compose up -d
 |---------|-----|
 | Frontend | http://localhost:3000 |
 | Backend API | http://localhost:8080 |
+| Swagger UI | http://localhost:8080/swagger-ui.html |
 | Worker Health | http://localhost:3001/health |
 | PostgreSQL | localhost:5432 |
 | MongoDB | localhost:27017 |
@@ -107,10 +111,20 @@ docker-compose up -d
 ## API Endpoints
 
 ### Authentication
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| `POST` | `/api/auth/register` | Register new user |
-| `POST` | `/api/auth/login` | Login, get JWT token |
+| Method | Endpoint | Auth | Description |
+|--------|----------|:----:|-------------|
+| `POST` | `/api/auth/register` | — | Register new user (sends verification email) |
+| `POST` | `/api/auth/login` | — | Login, get JWT token |
+| `POST` | `/api/auth/verify-email` | — | Verify email with token from inbox |
+| `POST` | `/api/auth/forgot-password` | — | Request password reset link |
+| `POST` | `/api/auth/reset-password` | — | Set new password with reset token |
+
+### Profile
+| Method | Endpoint | Auth | Description |
+|--------|----------|:----:|-------------|
+| `GET` | `/api/profile` | ✅ | Get current user's profile |
+| `PUT` | `/api/profile` | ✅ | Update name or email |
+| `POST` | `/api/profile/change-password` | ✅ | Change password |
 
 ### Companies
 | Method | Endpoint | Auth | Description |
@@ -137,6 +151,12 @@ docker-compose up -d
 | `PUT` | `/api/compliance/findings/:id/resolve` | ✅ | Mark finding as resolved |
 | `GET` | `/api/compliance/report/:companyId` | ✅ | Gap report (LLM-powered) |
 | `GET` | `/api/compliance/report/:companyId/pdf` | ✅ | Printable HTML report |
+
+### Stripe / Payments
+| Method | Endpoint | Auth | Description |
+|--------|----------|:----:|-------------|
+| `POST` | `/api/stripe/checkout` | ✅ | Create Stripe checkout session |
+| `POST` | `/api/stripe/webhook` | — | Handle Stripe webhook events |
 
 ### Admin
 | Method | Endpoint | Auth | Description |
@@ -185,11 +205,29 @@ The app auto-seeds 5 synthetic companies on first run:
 
 **Test login:** `pratik@test.com` / `test123`
 
+## Frontend Pages
+
+| Page | Route | Description |
+|------|-------|-------------|
+| Landing | `/` | Hero, problem, how it works, features, pricing |
+| Pricing | `/pricing` | Standalone pricing page with Stripe checkout |
+| Login | `/login` | Email/password login with forgot password link |
+| Register | `/register` | Account creation with email verification |
+| Verify Email | `/verify-email?token=` | Email verification confirmation |
+| Forgot Password | `/forgot-password` | Request password reset link |
+| Reset Password | `/reset-password?token=` | Set new password |
+| Dashboard | `/app` | Company cards, findings panel, compliance checks |
+| Upload | `/app/upload/:companyId` | Drag-and-drop document upload |
+| Gap Report | `/app/report/:companyId` | Severity breakdown, priority actions, PDF export |
+| Settings | `/app/settings` | Profile editing, password change, plan display |
+
 ## Project Structure
 
 ```
 FundraiseReadinessEngine/
 ├── docker-compose.yml              # Full stack orchestration
+├── Dockerfile                      # Root-level build for Railway
+├── railway.json                    # Railway deployment config
 ├── SPEC_v2.md                      # Technical specification
 ├── PRODUCT_ROADMAP.md              # Build plan
 │
@@ -198,14 +236,14 @@ FundraiseReadinessEngine/
 │   ├── pom.xml
 │   └── src/
 │       ├── main/java/com/fundraise/engine/
-│       │   ├── config/             # Security, CORS, OpenAPI, RateLimit
-│       │   ├── controller/         # REST endpoints (Auth, Company, Compliance, Document, Admin)
+│       │   ├── config/             # Security, CORS, OpenAPI, RateLimit, Stripe
+│       │   ├── controller/         # REST endpoints (Auth, Profile, Company, Compliance, Document, Admin, Stripe)
 │       │   ├── dto/                # Request/response DTOs
-│       │   ├── entity/             # JPA entities (9)
-│       │   ├── repository/         # Spring Data repos (8)
+│       │   ├── entity/             # JPA entities (User with plan/verification, Company, etc.)
+│       │   ├── repository/         # Spring Data repos
 │       │   ├── rules/              # 5 compliance rules
-│       │   ├── security/           # JWT filter
-│       │   └── service/            # Business logic (Auth, Company, Compliance, Document, Email, Admin, GapReport, PdfExport)
+│       │   ├── security/           # JWT filter + util
+│       │   └── service/            # Business logic (Auth, Profile, Company, Compliance, Document, Email, Admin, GapReport, PdfExport, Stripe)
 │       │       └── parser/         # CSV/XLSX parser
 │       └── test/                   # 49 tests (unit + E2E)
 │
@@ -215,8 +253,8 @@ FundraiseReadinessEngine/
 │   └── src/
 │       ├── components/             # Layout, ScoreChart
 │       ├── hooks/                  # useAuth
-│       ├── lib/                    # API client
-│       └── pages/                  # Landing, Login, Register, Dashboard, Upload, GapReport
+│       ├── lib/                    # API client (auth, profile, company, compliance, stripe)
+│       └── pages/                  # Landing, Login, Register, VerifyEmail, ForgotPassword, ResetPassword, Dashboard, Upload, GapReport, Settings, Pricing
 │
 └── fundraise-worker/               # Node.js document processor
     ├── Dockerfile
@@ -225,6 +263,32 @@ FundraiseReadinessEngine/
         └── health.js               # Health endpoint
 ```
 
+## Environment Variables
+
+### Backend (Production)
+
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `DATABASE_URL` | PostgreSQL connection string | `jdbc:postgresql://localhost:5432/fundraise_db` |
+| `DB_USERNAME` | PostgreSQL username | `fundraise` |
+| `DB_PASSWORD` | PostgreSQL password | `fundraise123` |
+| `JWT_SECRET` | Secret key for JWT signing | — |
+| `CORS_ALLOWED_ORIGINS` | Comma-separated allowed origins | `https://fundraise-frontend.vercel.app` |
+| `APP_FRONTEND_URL` | Frontend URL for email links | `http://localhost:5173` |
+| `STRIPE_SECRET_KEY` | Stripe API secret key | — |
+| `STRIPE_PRO_PRICE_ID` | Stripe price ID for Pro plan | — |
+| `STRIPE_ADVISOR_PRICE_ID` | Stripe price ID for Advisor plan | — |
+| `STRIPE_WEBHOOK_SECRET` | Stripe webhook signing secret | — |
+| `EMAIL_ENABLED` | Enable email sending | `false` |
+| `MAIL_HOST` | SMTP server host | — |
+| `MAIL_PORT` | SMTP server port | `587` |
+| `MAIL_USERNAME` | SMTP username | — |
+| `MAIL_PASSWORD` | SMTP password | — |
+
+### Frontend
+
+The frontend uses Vite and reads API base URL from the proxy config. No additional env vars needed for local development.
+
 ## Roadmap
 
 - [x] **Phase 0:** Backend scaffold, 5 rules, seed data, auth
@@ -232,9 +296,10 @@ FundraiseReadinessEngine/
 - [x] **Phase 2:** React dashboard, gap report, PDF export, score history
 - [x] **Phase 3:** Node.js worker, Docker Compose full stack
 - [x] **Phase 4:** Landing page, marketing, CI/CD
-- [x] **Phase 5:** Rate limiting, security hardening (done in Phase 4)
+- [x] **Phase 5:** Rate limiting, security hardening
 - [x] **Phase 6:** Swagger/OpenAPI docs, email notifications, admin dashboard
-- [ ] **Phase 7:** Deploy to Railway (backend) + Vercel (frontend)
+- [x] **Phase 7:** Email verification, password reset, profile settings, Stripe pricing
+- [ ] **Phase 8:** Deploy to Railway (backend) + Vercel (frontend)
 
 See `PRODUCT_ROADMAP.md` for the full build plan.
 
