@@ -74,6 +74,8 @@ export const complianceAPI = {
   resolveFinding: (findingId) => api.put(`/compliance/findings/${findingId}/resolve`),
   getGapReport: (companyId) => api.get(`/compliance/report/${companyId}`),
   getPdfReport: (companyId) => api.get(`/compliance/report/${companyId}/pdf`, { responseType: 'text' }),
+  getAllGuides: () => api.get('/compliance/guides'),
+  getGuideForRule: (ruleId) => api.get(`/compliance/guides/${ruleId}`),
 };
 
 // Stripe API

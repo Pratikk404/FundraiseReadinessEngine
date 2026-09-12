@@ -1,8 +1,10 @@
 package com.fundraise.engine.controller;
 
 import com.fundraise.engine.dto.FindingDto;
+import com.fundraise.engine.dto.FindingGuideDto;
 import com.fundraise.engine.dto.ReadinessScoreDto;
 import com.fundraise.engine.service.ComplianceService;
+import com.fundraise.engine.service.FindingGuideService;
 import com.fundraise.engine.service.GapReportService;
 import com.fundraise.engine.service.PdfExportService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -25,6 +27,7 @@ public class ComplianceController {
     private final ComplianceService complianceService;
     private final GapReportService gapReportService;
     private final PdfExportService pdfExportService;
+    private final FindingGuideService findingGuideService;
 
     @PostMapping("/check/{companyId}")
     @Operation(summary = "Run compliance check", description = "Execute all 5 compliance rules against the company's documents and data. Returns findings and readiness scores.")
@@ -73,5 +76,19 @@ public class ComplianceController {
                 .header(HttpHeaders.CONTENT_TYPE, "text/html")
                 .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=compliance-report.html")
                 .body(html);
+    }
+
+    @GetMapping("/guides")
+    @Operation(summary = "All fix guides", description = "Get fix-it guidance for all compliance rules.")
+    public ResponseEntity<Map<String, FindingGuideDto>> getAllGuides() {
+        return ResponseEntity.ok(findingGuideService.getAllGuides());
+    }
+
+    @GetMapping("/guides/{ruleId}")
+    @Operation(summary = "Fix guide for rule", description = "Get step-by-step fix guidance for a specific compliance rule.")
+    public ResponseEntity<FindingGuideDto> getGuideForRule(@PathVariable String ruleId) {
+        return findingGuideService.getGuideForRule(ruleId)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
     }
 }

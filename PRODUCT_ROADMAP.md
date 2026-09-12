@@ -1,5 +1,5 @@
 # Fundraise Readiness Engine — Product Roadmap
-> From prototype to deployment-ready product
+> From compliance checker to full fundraise lifecycle platform
 
 ---
 
@@ -33,201 +33,165 @@
 | Rate limiting, input sanitization, security headers | ✅ Done |
 | Stripe integration (checkout sessions, webhooks, plan management) | ✅ Done |
 | Deployment configs (Railway backend + Vercel frontend) | ✅ Done |
-| **Actual live deployment** | 🔄 In progress |
 
 ---
 
-## What's Built vs. What's Left
+## The Vision: From Checker to Platform
 
-### TIER 1 — Core Features
+```
+Founder plans to raise
+        ↓
+Stratum runs diagnostic          ← Phase 0-7 (DONE)
+        ↓
+Produces readiness report        ← Phase 0-7 (DONE)
+        ↓
+Founder fixes gaps (with guidance) ← Phase 8 (BUILDING NOW)
+        ↓
+Stratum supports the raise        ← Phase 10-11
+        ↓
+M&A / transaction advisory        ← Phase 12-13
+```
 
-#### 1. React Dashboard ✅ DONE
-- [x] Login / Register pages
-- [x] Company profile setup (create company)
-- [x] Document upload flow (drag & drop, file type validation)
-- [x] Readiness score dashboard (overall + per-category breakdown)
-- [x] Findings list with severity badges (CRITICAL / WARNING / INFO)
-- [x] Before/after score tracking (score history endpoint)
-- [x] Responsive design (Tailwind CSS)
-- [x] Profile settings page (update name/email, change password, plan display)
+### The Knowledge Moat
 
-#### 2. Document Upload & Parsing ✅ DONE
-- [x] File upload endpoint (multipart, stored locally)
-- [x] CSV/XLSX cap table parser (Apache POI in backend)
-- [x] Auto-extraction of equity events from uploaded cap table
-- [x] Auto-extraction of share classes
-- [x] Document processing status tracking
-- [x] Error handling for corrupt/unsupported files
-
-#### 3. Unit Tests ✅ DONE
-- [x] DilutionSumRule tests
-- [x] DpiitRecognitionRule tests
-- [x] EsopConsistencyRule tests
-- [x] ShareClassConsistencyRule tests
-- [x] ValuationConsistencyRule tests
-- [x] RulesEngine integration test
-- [x] Auth flow tests (register, login, JWT validation)
-- [x] Full flow integration test
-- [ ] Frontend tests — *not started*
-
-#### 4. CI/CD ✅ DONE
-- [x] GitHub Actions workflow (build + test on push/PR)
-- [x] Backend test job (JDK 17, Maven)
-- [x] Frontend build job (Node 20, npm ci + build)
-- [x] Worker install check job
-- [x] Dockerfiles (backend, frontend, worker)
-- [x] Deployment configs (Railway + Vercel)
-- [ ] Live deployment verification — *in progress*
-
----
-
-### TIER 2 — Production Features
-
-#### 5. Document Processing Pipeline ✅ DONE
-- [x] Node.js worker service (Express + BullMQ)
-- [x] PDF text extraction (pdf-parse)
-- [x] Regex-based entity extraction for structured fields
-- [x] MongoDB storage for raw parsed text
-- [x] Queue integration (Redis-backed BullMQ)
-- [ ] Dead-letter queue for failed jobs — *not started*
-
-#### 6. Intelligent Gap Report ✅ DONE
-- [x] Report generation service (template-based)
-- [x] Category-grouped findings (Cap Table, DPIIT, FEMA, ESOP, Share Structure, Valuation)
-- [x] Severity-based coloring (RED = must fix, YELLOW = should fix, GREEN = advisory)
-- [x] Priority actions section
-- [x] PDF export of gap report (HTML-based printable)
-- [x] Source document reference for each finding
-
-#### 7. User Management & Onboarding ✅ DONE
-- [x] JWT authentication (register, login)
-- [x] Role-based access (FOUNDER, ADVISOR, ADMIN)
-- [x] Email verification on registration (token-based flow)
-- [x] Password reset flow (forgot/reset with expiring tokens)
-- [x] Profile settings page (update name/email, change password)
-- [x] Plan management (FREE, PRO, ADVISOR)
-- [x] Email verification status badge
-- [ ] Advisor view (can see multiple companies) — *not started*
-
-#### 8. Notifications ✅ DONE
-- [x] Email notification when compliance check completes
-- [x] Email notification when readiness score changes
-- [x] Email verification email on registration
-- [x] Password reset email
-- [ ] In-app notification bell — *not started*
-
----
-
-### TIER 3 — Monetization Features
-
-#### 9. Pricing & Payments ✅ DONE
-- [x] Pricing page (Free / Pro / Advisor tiers)
-- [x] Stripe checkout session creation
-- [x] Stripe webhook handler for subscription updates
-- [x] Plan field on User entity
-- [x] Dedicated /pricing page with FAQ
-- [ ] Subscription management portal — *not started*
-- [ ] Usage-based billing — *not started*
-
-#### 10. Landing Page & Marketing ✅ DONE
-- [x] Landing page (hero, problem, how it works, features, pricing)
-- [x] Standalone pricing page
-- [ ] SEO optimization — *not started*
-- [ ] Demo video walkthrough — *not started*
-- [ ] Blog / content marketing setup — *not started*
-
-#### 11. Analytics & Monitoring — NOT STARTED
-- [ ] User analytics (signup funnel, feature usage)
-- [ ] Error tracking (Sentry)
-- [ ] Performance monitoring
-- [ ] Revenue dashboard — *not started*
-
-#### 12. Security & Compliance ✅ MOSTLY DONE
-- [x] HTTPS enforcement (via deployment platforms)
-- [x] Rate limiting (per user, per IP)
-- [x] Input sanitization (XSS prevention)
-- [x] CORS lockdown (production origins only)
-- [x] Security headers
-- [x] JWT token-based auth with expiration
-- [ ] JWT secret rotation — *not started*
-- [ ] Data encryption at rest — *not started*
-- [ ] GDPR compliance (data export, deletion) — *not started*
-- [ ] Privacy policy & terms of service — *not started*
-
----
-
-### TIER 4 — Scale Features
-
-#### 13. API & Integrations ✅ PARTIALLY DONE
-- [x] REST API documentation (OpenAPI/Swagger)
-- [x] Stripe webhook integration
-- [ ] API key management for enterprise users — *not started*
-- [ ] Zapier / n8n integration — *not started*
-
-#### 14. Advanced Features — NOT STARTED
-- [ ] Multi-language support (Hindi, Marathi, Tamil)
-- [ ] WhatsApp notification integration
-- [ ] CAPIF/regulatory update alerts
-- [ ] Cap table comparison tool (before/after round modeling)
-- [ ] Investor readiness checklist
-
-#### 15. Infrastructure ✅ DONE
-- [x] PostgreSQL (Docker Compose)
-- [x] MongoDB (Docker Compose)
-- [x] Redis (Docker Compose)
-- [ ] S3 / object storage for documents — *not started*
-- [ ] CDN for static assets — *not started*
-- [ ] Auto-scaling configuration — *not started*
-- [ ] Database backups & disaster recovery — *not started*
-- [ ] Staging environment — *not started*
+| Layer | What | Defensibility |
+|-------|------|--------------|
+| **Rules** | DilutionSum, DPIIT, ESOP, ShareClass, Valuation | You already have this ✅ |
+| **Proprietary failure patterns** | "Startups with X pattern fail 73% of the time" | Only comes from accumulating data |
+| **Historical cases** | "Company Y had this issue, fixed it this way" | Network effect — more users = better patterns |
+| **Workflow** | Guided fix steps, not just "here's your problem" | Retains users, increases LTV |
+| **Advisor expertise** | Encode what top advisors know into the tool | Differentiator vs. self-serve |
+| **Network** | Investors, advisors, service providers | Two-sided marketplace potential |
 
 ---
 
 ## Build Order
 
-| Phase | Status | What Got Built | Milestone |
+| Phase | Status | What Gets Built | Milestone |
 |-------|--------|----------------|-----------|
-| **Phase 0** ✅ | Done | Backend scaffold, 5 rules, seed data, auth | Backend compiles and runs |
-| **Phase 1** ✅ | Done | Unit tests (49 files), document upload, CSV/XLSX parser | Can upload cap table → see findings |
-| **Phase 2** ✅ | Done | React dashboard (6 pages), score visualization, gap report | Working demo end-to-end |
-| **Phase 3** ✅ | Done | Node worker, Docker Compose full stack | Real document processing |
-| **Phase 4** ✅ | Done | CI/CD (GitHub Actions), deployment configs | Automated builds |
-| **Phase 5** ✅ | Done | Rate limiting, security hardening | Production-ready security |
-| **Phase 6** ✅ | Done | Swagger docs, email notifications, admin dashboard | API docs + monitoring |
-| **Phase 7** ✅ | Done | Email verification, password reset, profile settings, Stripe pricing | Full user management + monetization |
-| **Phase 8** 🔄 | In Progress | Railway backend + Vercel frontend deployment | Live on the internet |
-| **Phase 9** | Planned | Frontend tests, dead-letter queue, S3 storage | Production hardening |
-| **Phase 10** | Planned | Analytics, monitoring, staging env | Production operations |
+| **Phase 0-7** ✅ | Done | Core platform: rules engine, dashboard, auth, payments | Working product |
+| **Phase 8** 🔨 | Building | Fix-it guidance: step-by-step fix instructions per finding | Diagnostic → actionable |
+| **Phase 9** | Planned | Historical case library: "50 companies had this issue, here's how they fixed it" | Knowledge moat begins |
+| **Phase 10** | Planned | Deploy to Railway + Vercel | Live on the internet |
+| **Phase 11** | Planned | Investor matching: readiness score → relevant investors | Full fundraise support |
+| **Phase 12** | Planned | Advisor marketplace: certified advisors review reports | Two-sided network |
+| **Phase 13** | Planned | M&A / transaction advisory module | Full lifecycle |
 
 ---
 
-## What's Left for MVP (Sellable Product)
+## Phase 8: Fix-It Guidance (Current Focus)
 
-### Must-do before launch:
-1. **Verify live deployment** — Railway backend + Vercel frontend are configured but need to be tested
-2. ~~**Email verification**~~ — founders need to confirm email before using the tool ✅
-3. ~~**Password reset**~~ — can't sell if users get locked out ✅
-4. ~~**Profile settings**~~ — basic account management ✅
-5. ~~**Pricing page + Stripe**~~ — the actual money-making layer ✅
+### What it is
+After the diagnostic runs and shows findings, each finding now has:
+- **What's wrong** — the finding description (already exists)
+- **Why it matters** — the risk/investor concern (new)
+- **How to fix it** — step-by-step instructions (new)
+- **What good looks like** — example of a corrected state (new)
+- **Estimated effort** — quick fix / moderate / needs advisor (new)
 
-### Nice-to-have before launch:
-6. Frontend tests (current: 0)
-7. Dead-letter queue for failed document processing
-8. S3 storage for documents (currently local filesystem)
-9. JWT secret rotation
-10. GDPR data export/deletion
+### Why it matters
+- Transforms the tool from "here's your score" to "here's exactly what to do"
+- Founders don't need to hire an advisor just to understand the findings
+- Increases engagement — founders come back to check off fixes
+- Generates data on what fixes work → feeds the knowledge moat
+
+### Backend changes
+- `FindingGuide` entity with fix steps, risk explanation, example, effort level
+- `GET /api/compliance/findings/:id/guide` endpoint
+- Pre-seeded guide content for all 5 rules
+
+### Frontend changes
+- Updated GapReport page with expandable fix steps per finding
+- Effort badges (quick fix / moderate / needs advisor)
+- "Mark as fixed" flow with before/after tracking
 
 ---
 
-## Revenue Model
+## Phase 9: Historical Case Library
+
+### What it is
+A growing database of real (anonymized) cases:
+- "Company X had dilution math summing to 94% — they issued 6% ESOP top-up, re-ran check, passed"
+- "Company Y was missing DPIIT recognition — filed for recognition, took 3 weeks, then angel tax risk cleared"
+
+### Why it matters
+- Each case makes the tool smarter — pattern recognition across companies
+- Founders see "companies like me had this issue" — reduces anxiety, increases trust
+- Builds the proprietary dataset that no competitor has
+
+---
+
+## Phase 10: Deployment
+
+### What it is
+Railway (backend) + Vercel (frontend) — the deployment configs are ready, just need to go live.
+
+### Why it matters
+- Can't build the knowledge moat without users
+- Can't iterate without real feedback
+- The product is ready — just needs to be deployed
+
+---
+
+## Phase 11: Investor Matching
+
+### What it is
+Based on readiness score, company stage, and sector, match founders with relevant investors:
+- "Your readiness score is 85/100 — these 5 investors fund at your stage"
+- "You're DPIIT-recognized — these investors require it"
+- "Your ESOP pool is clean — these investors care about that"
+
+### Why it matters
+- Completes the fundraise lifecycle — not just "are you ready?" but "here's who to talk to"
+- Revenue opportunity (investors pay for deal flow)
+- Two-sided network effect
+
+---
+
+## Phase 12: Advisor Marketplace
+
+### What it is
+Certified advisors can:
+- Review readiness reports
+- Offer guidance on fix steps
+- Be matched with founders who need help
+- Build reputation through successful engagements
+
+### Why it matters
+- Some findings genuinely need human expertise (legal, tax, FEMA)
+- Advisors get deal flow; founders get expert help
+- Platform takes a cut — new revenue stream
+
+---
+
+## Phase 13: M&A / Transaction Advisory
+
+### What it is
+Extended module for:
+- Due diligence document management
+- Transaction readiness scoring
+- Buyer/seller matching
+- Deal process workflow
+
+### Why it matters
+- Same document verification infrastructure, different use case
+- M&A advisory is ₹50K-2L per deal in India
+- Natural extension once you have the document parsing + compliance engine
+
+---
+
+## Revenue Model (Current + Future)
 
 | Tier | Price | Features |
 |------|-------|----------|
 | **Free** | ₹0 | 1 company, basic checks, no PDF export |
-| **Pro** | ₹999/month | Unlimited companies, full checks, PDF export, email reports |
+| **Pro** | ₹999/month | Unlimited companies, full checks, PDF export, fix guidance |
 | **Advisor** | ₹4,999/month | Multiple client companies, bulk analysis, white-label reports |
 | **Enterprise** | Custom | API access, custom rules, SSO, dedicated support |
 
-**Target market:** 50,000+ Indian startups registered with DPIIT, plus ~5,000 advisory firms doing pre-fundraise work.
+**Future revenue streams:**
+- Investor matching fees
+- Advisor marketplace commissions
+- M&A transaction advisory
 
-**Competitive advantage:** No other tool verifies actual documents against Indian regulatory patterns. Advisory firms charge ₹50,000-2,00,000 for this manually. This tool does it for ₹999/month.
+**Target market:** 50,000+ Indian startups registered with DPIIT, plus ~5,000 advisory firms doing pre-fundraise work.

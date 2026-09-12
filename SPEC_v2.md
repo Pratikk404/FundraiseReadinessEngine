@@ -410,13 +410,162 @@ Lead with the domain gap (self-report tools vs. document-verified diagnostics), 
 ## 15. Tech Stack Summary
 
 ```
-Backend:     Java 17 + Spring Boot 3.x + Spring Security + Spring Data JPA
+Backend:     Java 17 + Spring Boot 4.0.1 + Spring Security + Spring Data JPA
 Worker:      Node.js 20 + Express + BullMQ + pdf-parse + Apache Tika wrapper
-Frontend:    React 18 + Vite + Tailwind CSS + React Query
+Frontend:    React 18 + Vite 8 + Tailwind CSS 4 + React Query
 Database 1:  PostgreSQL 16
 Database 2:  MongoDB 7
 Queue:       Redis 7 (BullMQ backing)
 ML/AI:       OpenAI / Anthropic API (via HTTP client)
-DevOps:      Docker Compose, GitHub Actions
+Payments:    Stripe (checkout sessions, webhooks, subscriptions)
+DevOps:      Docker Compose, GitHub Actions, Railway, Vercel
 Build:       Maven (backend), npm (frontend + worker)
 ```
+
+---
+
+## 16. Platform Vision: From Checker to Lifecycle
+
+### 16.1 The evolution
+
+The system starts as a point-in-time compliance checker and evolves into a full fundraise lifecycle platform:
+
+```
+Founder plans to raise
+        ↓
+Stratum runs diagnostic          ← Phases 0-7 (DONE)
+        ↓
+Produces readiness report        ← Phases 0-7 (DONE)
+        ↓
+Founder fixes gaps (with guidance) ← Phase 8
+        ↓
+Stratum supports the raise        ← Phases 10-11
+        ↓
+M&A / transaction advisory        ← Phases 12-13
+```
+
+### 16.2 The knowledge moat
+
+The long-term defensibility comes from accumulating proprietary knowledge that no competitor has:
+
+| Layer | Description | Defensibility |
+|-------|-------------|---------------|
+| **Rules** | Deterministic compliance checks (DilutionSum, DPIIT, ESOP, ShareClass, Valuation) | Replicable but requires domain expertise |
+| **Proprietary failure patterns** | "Startups with X pattern fail 73% of the time in diligence" | Only comes from accumulating data across companies |
+| **Historical cases** | "Company Y had this issue, fixed it this way, raised successfully" | Network effect — more users = better patterns |
+| **Workflow** | Guided fix steps, not just "here's your problem" | Retains users, increases LTV |
+| **Advisor expertise** | Encode what top advisors know into the tool | Differentiator vs. self-serve tools |
+| **Network** | Investors, advisors, service providers on platform | Two-sided marketplace potential |
+
+### 16.3 Why this works in India
+
+- 50,000+ DPIIT-registered startups need fundraise readiness
+- Advisory firms charge ₹50,000-2,00,000 for manual compliance checks
+- No tool verifies actual documents against Indian regulatory patterns
+- The DPIIT/FEMA/ESOP regulatory landscape is uniquely Indian — global tools don't apply
+- Founders want to self-serve but don't know what they don't know
+
+---
+
+## 17. Fix-It Guidance System
+
+### 17.1 Problem
+
+The current system tells founders "your dilution math is wrong" but doesn't tell them how to fix it. Founders still need to hire an advisor to understand and resolve findings.
+
+### 17.2 Solution
+
+Each finding now comes with structured fix guidance:
+
+```json
+{
+  "findingId": "uuid",
+  "ruleId": "DILUTION_SUM_100",
+  "description": "Total equity sums to 94%, not 100%",
+  "guide": {
+    "whyItMatters": "Investors will flag this immediately. Dilution math must sum to exactly 100% or the cap table is considered unreliable.",
+    "howToFix": [
+      "Review all equity events since incorporation",
+      "Check if any ESOP top-ups were promised but not recorded",
+      "Verify the 6% gap — likely an unrecorded ESOP pool allocation",
+      "Update the cap table to include the missing allocation",
+      "Re-run the compliance check to verify the fix"
+    ],
+    "whatGoodLooksLike": "All equity events recorded: Founders 70% + Seed 20% + ESOP Pool 10% = 100% exactly.",
+    "effortLevel": "QUICK_FIX",
+    "estimatedTime": "30 minutes",
+    "needsAdvisor": false,
+    "relatedCases": [
+      "InnovateHub Technologies had the same issue — missing 6% ESOP allocation",
+      "FinServ Solutions had a similar gap from unrecorded convertible notes"
+    ]
+  }
+}
+```
+
+### 17.3 Effort levels
+
+| Level | Description | Founder can self-fix? |
+|-------|-------------|---------------------|
+| `QUICK_FIX` | Minor data entry or document update | Yes |
+| `MODERATE` | Requires understanding of legal/regulatory context | Maybe, with guidance |
+| `NEEDS_ADVISOR` | Involves legal filings, FEMA compliance, or board resolutions | No — needs professional help |
+
+### 17.4 Pre-seeded guides
+
+Each rule gets a guide template:
+
+| Rule | Effort | Typical fix |
+|------|--------|-------------|
+| DilutionSumRule | QUICK_FIX | Record missing equity event |
+| DpiitRecognitionRule | NEEDS_ADVISOR | File for DPIIT recognition (3-4 weeks) |
+| EsopConsistencyRule | MODERATE | Formalize informal grants via board resolution |
+| ShareClassConsistencyRule | MODERATE | Update incorporation docs or side letters |
+| ValuationConsistencyRule | QUICK_FIX | Correct price per share in cap table |
+
+### 17.5 Data model
+
+```sql
+CREATE TABLE finding_guides (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    rule_id VARCHAR(100) NOT NULL UNIQUE,
+    why_it_matters TEXT NOT NULL,
+    how_to_fix JSONB NOT NULL,           -- Array of step strings
+    what_good_looks_like TEXT NOT NULL,
+    effort_level VARCHAR(20) NOT NULL,    -- QUICK_FIX, MODERATE, NEEDS_ADVISOR
+    estimated_time VARCHAR(50),
+    needs_advisor BOOLEAN DEFAULT FALSE,
+    related_cases JSONB,                  -- Array of case reference strings
+    created_at TIMESTAMP DEFAULT NOW(),
+    updated_at TIMESTAMP DEFAULT NOW()
+);
+```
+
+---
+
+## 18. Future Phases
+
+### Phase 9: Historical Case Library
+- Anonymized case database: "Company X had this issue, fixed it this way"
+- Pattern recognition across companies
+- Founders see "companies like me" — reduces anxiety, increases trust
+
+### Phase 10: Deployment
+- Railway (backend) + Vercel (frontend)
+- Configs already in place
+
+### Phase 11: Investor Matching
+- Readiness score → relevant investors
+- "Your score is 85 — these 5 investors fund at your stage"
+- Revenue opportunity (investors pay for deal flow)
+
+### Phase 12: Advisor Marketplace
+- Certified advisors review reports
+- Matched with founders who need help
+- Platform takes a commission
+
+### Phase 13: M&A / Transaction Advisory
+- Due diligence document management
+- Transaction readiness scoring
+- Buyer/seller matching
+- Same infrastructure, different use case

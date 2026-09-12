@@ -1,13 +1,20 @@
+import { useState } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { complianceAPI } from '../lib/api'
 
 export default function GapReport() {
   const { companyId } = useParams()
+  const [expandedFinding, setExpandedFinding] = useState(null)
 
   const { data: report, isLoading, error } = useQuery({
     queryKey: ['gapReport', companyId],
     queryFn: () => complianceAPI.getGapReport(companyId).then(r => r.data),
+  })
+
+  const { data: guides } = useQuery({
+    queryKey: ['guides'],
+    queryFn: () => complianceAPI.getAllGuides().then(r => r.data),
   })
 
   const handlePrint = async () => {
@@ -20,6 +27,10 @@ export default function GapReport() {
     } catch (err) {
       console.error('Failed to load report:', err)
     }
+  }
+
+  const toggleFinding = (findingId) => {
+    setExpandedFinding(expandedFinding === findingId ? null : findingId)
   }
 
   const readinessColor = {
@@ -44,6 +55,18 @@ export default function GapReport() {
     CRITICAL: '🔴',
     WARNING: '🟡',
     INFO: '🔵',
+  }
+
+  const effortColor = {
+    QUICK_FIX: 'bg-green-100 text-green-700',
+    MODERATE: 'bg-yellow-100 text-yellow-700',
+    NEEDS_ADVISOR: 'bg-red-100 text-red-700',
+  }
+
+  const effortLabel = {
+    QUICK_FIX: '⚡ Quick Fix',
+    MODERATE: '🔧 Moderate',
+    NEEDS_ADVISOR: '👨‍⚖️ Needs Advisor',
   }
 
   if (isLoading) {
@@ -122,22 +145,89 @@ export default function GapReport() {
         </div>
       )}
 
-      {/* Category Breakdown */}
+      {/* Category Breakdown with Fix-It Guidance */}
       {report?.categoryBreakdown && Object.entries(report.categoryBreakdown).map(([category, findings]) => (
         <div key={category} className="mb-6">
           <h2 className="text-lg font-semibold text-gray-900 mb-3">{formatCategory(category)}</h2>
           <div className="space-y-2">
-            {findings.map((f) => (
-              <div key={f.id} className={`p-4 rounded-lg border ${severityColor[f.severity]}`}>
-                <div className="flex items-start gap-2">
-                  <span>{severityIcon[f.severity]}</span>
-                  <div>
-                    <p className="font-medium">{f.ruleId}</p>
-                    <p className="text-sm mt-1 opacity-80">{f.description}</p>
-                  </div>
+            {findings.map((f) => {
+              const guide = guides?.[f.ruleId]
+              const isExpanded = expandedFinding === f.id
+
+              return (
+                <div key={f.id} className={`rounded-lg border ${severityColor[f.severity]}`}>
+                  {/* Finding header — clickable */}
+                  <button
+                    onClick={() => toggleFinding(f.id)}
+                    className="w-full p-4 text-left flex items-start gap-2 hover:bg-black/5 transition-colors"
+                  >
+                    <span>{severityIcon[f.severity]}</span>
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2">
+                        <p className="font-medium">{f.ruleId}</p>
+                        {guide && (
+                          <span className={`text-xs px-2 py-0.5 rounded-full ${effortColor[guide.effortLevel]}`}>
+                            {effortLabel[guide.effortLevel]}
+                          </span>
+                        )}
+                      </div>
+                      <p className="text-sm mt-1 opacity-80">{f.description}</p>
+                    </div>
+                    <span className="text-gray-400 text-sm">{isExpanded ? '▲' : '▼'}</span>
+                  </button>
+
+                  {/* Fix-It Guidance — expandable */}
+                  {isExpanded && guide && (
+                    <div className="px-4 pb-4 border-t border-black/10">
+                      {/* Why it matters */}
+                      <div className="mt-4 p-3 bg-white rounded-lg border border-black/10">
+                        <h4 className="text-sm font-semibold text-gray-900 mb-1">Why this matters</h4>
+                        <p className="text-sm text-gray-700">{guide.whyItMatters}</p>
+                      </div>
+
+                      {/* How to fix */}
+                      <div className="mt-3 p-3 bg-white rounded-lg border border-black/10">
+                        <h4 className="text-sm font-semibold text-gray-900 mb-2">How to fix it</h4>
+                        <ol className="space-y-2">
+                          {guide.howToFix.map((step, i) => (
+                            <li key={i} className="flex gap-2 text-sm text-gray-700">
+                              <span className="flex-shrink-0 w-5 h-5 bg-indigo-100 text-indigo-700 rounded-full flex items-center justify-center text-xs font-bold">
+                                {i + 1}
+                              </span>
+                              <span>{step}</span>
+                            </li>
+                          ))}
+                        </ol>
+                      </div>
+
+                      {/* What good looks like */}
+                      <div className="mt-3 p-3 bg-green-50 rounded-lg border border-green-200">
+                        <h4 className="text-sm font-semibold text-green-900 mb-1">✅ What good looks like</h4>
+                        <p className="text-sm text-green-700">{guide.whatGoodLooksLike}</p>
+                      </div>
+
+                      {/* Meta info */}
+                      <div className="mt-3 flex items-center gap-4 text-xs text-gray-500">
+                        <span>⏱️ {guide.estimatedTime}</span>
+                        {guide.needsAdvisor && <span>👨‍⚖️ Professional help recommended</span>}
+                      </div>
+
+                      {/* Related cases */}
+                      {guide.relatedCases?.length > 0 && (
+                        <div className="mt-3 p-3 bg-gray-50 rounded-lg border border-gray-200">
+                          <h4 className="text-sm font-semibold text-gray-900 mb-1">📚 Related cases</h4>
+                          <ul className="space-y-1">
+                            {guide.relatedCases.map((c, i) => (
+                              <li key={i} className="text-sm text-gray-600">• {c}</li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </div>
-              </div>
-            ))}
+              )
+            })}
           </div>
         </div>
       ))}
