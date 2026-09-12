@@ -34,6 +34,8 @@ This tool does the opposite: it ingests real documents and checks them against t
 | **Share Class Consistency** | Rights in side letters contradict incorporation documents |
 | **Valuation Consistency** | Price per share doesn't align with declared round valuation |
 
+Each finding comes with **fix-it guidance**: why it matters, step-by-step fix instructions, what good looks like, effort level (quick fix / moderate / needs advisor), and related cases from other companies.
+
 ## Architecture
 
 ```
@@ -151,6 +153,8 @@ docker-compose up -d
 | `PUT` | `/api/compliance/findings/:id/resolve` | ✅ | Mark finding as resolved |
 | `GET` | `/api/compliance/report/:companyId` | ✅ | Gap report (LLM-powered) |
 | `GET` | `/api/compliance/report/:companyId/pdf` | ✅ | Printable HTML report |
+| `GET` | `/api/compliance/guides` | ✅ | All fix-it guides |
+| `GET` | `/api/compliance/guides/:ruleId` | ✅ | Fix guide for a specific rule |
 
 ### Stripe / Payments
 | Method | Endpoint | Auth | Description |
@@ -299,7 +303,8 @@ The frontend uses Vite and reads API base URL from the proxy config. No addition
 - [x] **Phase 5:** Rate limiting, security hardening
 - [x] **Phase 6:** Swagger/OpenAPI docs, email notifications, admin dashboard
 - [x] **Phase 7:** Email verification, password reset, profile settings, Stripe pricing
-- [ ] **Phase 8:** Deploy to Railway (backend) + Vercel (frontend)
+- [x] **Phase 8:** Fix-it guidance system (per-finding step-by-step fix instructions, effort levels, related cases)
+- [ ] **Phase 9:** Deploy to Railway (backend) + Vercel (frontend)
 
 See `PRODUCT_ROADMAP.md` for the full build plan.
 
